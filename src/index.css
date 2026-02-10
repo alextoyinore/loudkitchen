@@ -795,3 +795,19 @@ select:focus {
         width: 55%;
     }
 }
+
+/* Home Section Layout Fixes */
+@media (max-width: 768px) {
+    .hero h1 {
+        font-size: 2.25rem !important;
+    }
+
+    .hero p {
+        font-size: 1.125rem !important;
+        padding: 0 1rem;
+    }
+
+    .section h2 {
+        font-size: 2.25rem;
+    }
+}
