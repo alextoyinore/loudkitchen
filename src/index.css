@@ -783,18 +783,15 @@ select:focus {
     transform: scale(1.1);
 }
 
-/* Home Section Layout Fixes */
-@media (max-width: 768px) {
-    .hero h1 {
-        font-size: 2.5rem !important;
-    }
+/* Blog Detail Layout */
+.blog-content-wrapper {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+}
 
-    .hero p {
-        font-size: 1.125rem !important;
-        padding: 0 1rem;
-    }
-
-    .section h2 {
-        font-size: 2.5rem;
+@media (min-width: 1024px) {
+    .blog-content-wrapper {
+        width: 55%;
     }
 }
