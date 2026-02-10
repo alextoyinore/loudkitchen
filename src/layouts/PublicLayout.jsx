@@ -11,7 +11,10 @@ const PublicLayout = () => {
     return (
         <div
             className="min-h-screen flex flex-col bg-primary"
-            style={{ paddingLeft: 'var(--page-margin)', paddingRight: 'var(--page-margin)' }}
+            style={{
+                paddingLeft: isHome ? '0' : 'var(--page-margin)',
+                paddingRight: isHome ? '0' : 'var(--page-margin)'
+            }}
         >
             <div className="flex-1 flex flex-col bg-primary relative">
                 <Navbar />

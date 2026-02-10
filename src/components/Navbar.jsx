@@ -39,10 +39,12 @@ const Navbar = () => {
 
     const isActive = (path) => location.pathname === path;
 
+    const isHome = location.pathname === '/';
+
     return (
         <nav className={`navbar ${scrolled ? 'navbar-scrolled' : ''}`} style={{
-            left: 'var(--page-margin, 0)',
-            right: 'var(--page-margin, 0)'
+            left: isHome ? '0' : 'var(--page-margin, 0)',
+            right: isHome ? '0' : 'var(--page-margin, 0)'
         }}>
             <div className="container navbar-inner">
                 <Link to="/" className="logo">

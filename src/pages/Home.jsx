@@ -56,7 +56,7 @@ const Home = () => {
                         every detail is designed to amplify your evening.
                     </p>
                     <img
-                        src="https://images.unsplash.com/photo-1514362545857-3bc16549766b?auto=format&fit=crop&q=80&w=1200"
+                        src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1200"
                         alt="Restaurant Interior"
                         className="w-full h-96 object-cover rounded-lg shadow-2xl opacity-80"
                     />

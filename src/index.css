@@ -636,12 +636,17 @@ select:focus {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100%;
+    right: 0;
     z-index: 1000;
     height: 80px;
     display: flex;
     align-items: center;
     transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.navbar .container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
 }
 
 .navbar-scrolled {
@@ -657,11 +662,6 @@ select:focus {
     justify-content: space-between;
     align-items: center;
     width: 100%;
-}
-
-.navbar .container {
-    padding-left: 0;
-    padding-right: 0;
 }
 
 .logo {
