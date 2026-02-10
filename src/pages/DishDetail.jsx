@@ -36,7 +36,7 @@ const DishDetail = () => {
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
                     {/* Left Column: Image */}
-                    <div className="rounded-2xl overflow-hidden shadow-2xl border border-gray-800 relative bg-secondary h-400 lg:h-500">
+                    <div className="rounded-2xl overflow-hidden shadow-2xl border border-gray-800 relative bg-secondary h-72 md:h-96 lg:h-[500px]">
                         <img
                             src={dish.image}
                             alt={dish.name}

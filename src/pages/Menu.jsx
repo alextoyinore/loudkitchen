@@ -31,19 +31,21 @@ const Menu = () => {
 
             <div className="container section">
                 {/* Category Filter */}
-                <div className="flex flex-wrap justify-center gap-4 mb-16">
-                    {categories.map(cat => (
-                        <button
-                            key={cat}
-                            onClick={() => setActiveCategory(cat)}
-                            className={`px-6 py-2 rounded-full border transition-all duration-300 ${activeCategory === cat
-                                ? 'bg-accent border-accent text-black font-bold'
-                                : 'bg-transparent border-gray-700 text-gray-300 hover:border-accent hover:text-accent'
-                                }`}
-                        >
-                            {cat}
-                        </button>
-                    ))}
+                <div className="overflow-x-auto no-scrollbar mb-16 px-4 -mx-4">
+                    <div className="flex justify-start md:justify-center gap-4 min-w-max pb-4">
+                        {categories.map(cat => (
+                            <button
+                                key={cat}
+                                onClick={() => setActiveCategory(cat)}
+                                className={`px-6 py-2 rounded-full border transition-all duration-300 whitespace-nowrap ${activeCategory === cat
+                                    ? 'bg-accent border-accent text-black font-bold'
+                                    : 'bg-transparent border-gray-700 text-gray-300 hover:border-accent hover:text-accent'
+                                    }`}
+                            >
+                                {cat}
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
                 {/* Menu Grid */}

@@ -23,6 +23,8 @@ const Home = () => {
                     muted
                     loop
                     playsInline
+                    webkit-playsinline="true"
+                    preload="auto"
                     className="absolute top-0 left-0 w-full h-full object-cover z-0"
                     style={{ filter: 'brightness(0.3)' }}
                 >

@@ -23,8 +23,8 @@ const BlogDetail = () => {
     }
 
     return (
-        <div className="blog-detail-page bg-primary min-h-screen pt-12 md:pt-20 pb-20">
-            <div className="container max-w-2xl mx-auto px-4 md:px-8">
+        <div className="blog-detail-page max-w-2xl mx-auto bg-primary min-h-screen pt-12 md:pt-20 pb-20">
+            <div className="container px-4 md:px-8">
                 {/* Back Link */}
                 <Link to="/blog" className="inline-flex items-center gap-2 text-gray-400 hover:text-accent transition-colors mb-8">
                     <ArrowLeft size={16} /> <span className="text-sm font-bold uppercase tracking-wider">Back to Blog</span>
@@ -63,7 +63,7 @@ const BlogDetail = () => {
                 </div>
 
                 {/* Footer / Share */}
-                <div className="mt-16 pt-8 flex flex-col md:flex-row justify-between items-center gap-6">
+                <div className="my-24 py-12 flex flex-col md:flex-row justify-between items-center gap-10">
                     <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-full bg-gray-700 overflow-hidden">
                             <img src={`https://ui-avatars.com/api/?name=${post.author}&background=random`} alt={post.author} className="w-full h-full object-cover" />
@@ -74,7 +74,7 @@ const BlogDetail = () => {
                         </div>
                     </div>
 
-                    <button className="flex items-center gap-2 text-gray-400 hover:text-accent transition-colors">
+                    <button className="my-12 flex items-center gap-2 text-gray-400 hover:text-accent transition-colors">
                         <Share2 size={18} /> <span className="uppercase tracking-widest text-sm font-bold">Share Article</span>
                     </button>
                 </div>
