@@ -2,6 +2,35 @@ import React from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import { ArrowLeft, Calendar, User, Share2 } from 'lucide-react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
+
+const markdownComponents = {
+    h1: ({ children }) => <h1 className="text-3xl md:text-4xl font-heading font-bold text-white mb-6 mt-10 leading-tight">{children}</h1>,
+    h2: ({ children }) => <h2 className="text-2xl md:text-3xl font-heading font-bold text-white mb-5 mt-8 leading-tight">{children}</h2>,
+    h3: ({ children }) => <h3 className="text-xl md:text-2xl font-heading font-semibold text-white mb-4 mt-6">{children}</h3>,
+    h4: ({ children }) => <h4 className="text-lg font-heading font-semibold text-gray-200 mb-3 mt-5">{children}</h4>,
+    p: ({ children }) => <p className="text-gray-300 leading-relaxed mb-8 text-base md:text-lg">{children}</p>,
+    strong: ({ children }) => <strong className="text-white font-bold">{children}</strong>,
+    em: ({ children }) => <em className="text-gray-200 italic">{children}</em>,
+    ul: ({ children }) => <ul className="list-disc list-outside pl-8 my-6 space-y-3 text-gray-300">{children}</ul>,
+    ol: ({ children }) => <ol className="list-decimal list-outside pl-8 my-6 space-y-3 text-gray-300">{children}</ol>,
+    li: ({ children }) => <li className="leading-relaxed text-base md:text-lg pl-1">{children}</li>,
+    blockquote: ({ children }) => (
+        <blockquote className="border-l-4 border-accent pl-6 py-2 my-6 bg-white/5 rounded-r-xl italic text-gray-300">
+            {children}
+        </blockquote>
+    ),
+    code: ({ inline, children }) => inline
+        ? <code className="bg-white/10 text-accent font-mono text-sm px-1.5 py-0.5 rounded">{children}</code>
+        : <pre className="bg-[#0a0a0a] border border-white/10 rounded-xl p-5 my-6 overflow-x-auto"><code className="font-mono text-sm text-gray-300 leading-relaxed">{children}</code></pre>,
+    a: ({ href, children }) => <a href={href} target="_blank" rel="noopener noreferrer" className="text-accent underline underline-offset-4 hover:text-white transition-colors">{children}</a>,
+    hr: () => <hr className="border-t border-white/10 my-10" />,
+    img: ({ src, alt }) => <img src={src} alt={alt} className="rounded-2xl max-w-full my-8 shadow-lg" />,
+    table: ({ children }) => <div className="overflow-x-auto my-8"><table className="w-full border-collapse text-gray-300">{children}</table></div>,
+    th: ({ children }) => <th className="border border-white/10 bg-white/5 px-4 py-3 text-left text-white font-heading font-semibold text-sm uppercase tracking-wider">{children}</th>,
+    td: ({ children }) => <td className="border border-white/10 px-4 py-3 text-sm">{children}</td>,
+};
 
 const BlogDetail = () => {
     const { id } = useParams();
@@ -53,8 +82,10 @@ const BlogDetail = () => {
                         <p className="text-xl md:text-2xl text-gray-300 leading-relaxed mb-12">
                             {post.excerpt}
                         </p>
-                        <div className="text-gray-400 space-y-10 leading-loose whitespace-pre-line text-lg">
-                            {post.content}
+                        <div className="prose prose-invert max-w-none">
+                            <ReactMarkdown remarkPlugins={[remarkGfm]} components={markdownComponents}>
+                                {post.content}
+                            </ReactMarkdown>
                         </div>
                     </div>
 

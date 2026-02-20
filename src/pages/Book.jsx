@@ -4,17 +4,14 @@ import { useData } from '../context/DataContext';
 const Book = () => {
     const { addBooking } = useData();
     const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        phone: '',
-        date: '',
-        time: '',
-        guests: 2,
-        requests: ''
+        name: '', email: '', phone: '',
+        date: '', time: '', guests: '2', notes: ''
     });
     const [submitted, setSubmitted] = useState(false);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
+
+    const today = new Date().toISOString().split('T')[0];
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -26,12 +23,15 @@ const Book = () => {
         setLoading(true);
         setError(null);
         try {
-            const { error: submitError } = await addBooking({ ...formData, notes: formData.requests });
+            const { error: submitError } = await addBooking({
+                ...formData,
+                guests: parseInt(formData.guests),
+            });
             if (submitError) throw submitError;
             setSubmitted(true);
         } catch (err) {
             console.error('Booking error:', err);
-            setError('Failed to book table. Please try again.');
+            setError('Failed to submit your reservation. Please try again.');
         } finally {
             setLoading(false);
         }

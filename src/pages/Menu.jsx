@@ -37,7 +37,7 @@ const Menu = () => {
                             <button
                                 key={cat}
                                 onClick={() => setActiveCategory(cat)}
-                                className={`px-6 py-2 rounded-full border transition-all duration-300 whitespace-nowrap ${activeCategory === cat
+                                className={`px-6 py-2 rounded-full transition-all duration-300 whitespace-nowrap ${activeCategory === cat
                                     ? 'bg-accent border-accent text-black font-bold'
                                     : 'bg-transparent border-gray-700 text-gray-300 hover:border-accent hover:text-accent'
                                     }`}

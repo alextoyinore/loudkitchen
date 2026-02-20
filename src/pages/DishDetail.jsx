@@ -1,14 +1,15 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
 import { useCart } from '../context/CartContext';
-import { ArrowLeft, Clock, CheckCircle, XCircle, Share2, ShoppingBag } from 'lucide-react';
+import { ArrowLeft, Clock, CheckCircle, XCircle, Share2, ShoppingBag, Check } from 'lucide-react';
 
 const DishDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { menuItems } = useData();
     const { addToCart } = useCart();
+    const [added, setAdded] = useState(false);
 
     const dish = menuItems.find(item => String(item.id) === id);
 
@@ -22,6 +23,12 @@ const DishDetail = () => {
             </div>
         );
     }
+
+    const handleAddToCart = () => {
+        addToCart(dish, 1);
+        setAdded(true);
+        setTimeout(() => setAdded(false), 1800);
+    };
 
     return (
         <div className="dish-detail-page bg-primary min-h-screen">
@@ -90,11 +97,25 @@ const DishDetail = () => {
 
                             <div className="flex flex-row gap-4 items-center">
                                 <button
-                                    onClick={() => addToCart(dish, 1)}
-                                    className="flex-[2] btn btn-primary py-4 font-bold tracking-wider flex items-center justify-center gap-3"
+                                    onClick={handleAddToCart}
+                                    disabled={!dish.is_available}
+                                    className={`flex-[2] py-4 font-bold tracking-wider flex items-center justify-center gap-3 rounded-xl transition-all duration-300 text-sm uppercase
+                                        ${added
+                                            ? 'bg-green-500 text-white scale-[0.98] shadow-[0_0_20px_rgba(34,197,94,0.3)]'
+                                            : 'btn btn-primary hover:scale-[1.02] active:scale-[0.97]'
+                                        } disabled:opacity-50 disabled:cursor-not-allowed`}
                                 >
-                                    <ShoppingBag size={20} />
-                                    Add to Order
+                                    {added ? (
+                                        <>
+                                            <Check size={20} className="animate-bounce-in" />
+                                            Added to Order!
+                                        </>
+                                    ) : (
+                                        <>
+                                            <ShoppingBag size={20} />
+                                            Add to Order
+                                        </>
+                                    )}
                                 </button>
 
                                 <button
@@ -116,6 +137,11 @@ const DishDetail = () => {
                                     <span className="hidden sm:inline">Share</span>
                                 </button>
                             </div>
+
+                            {/* Mini confirmation hint */}
+                            <p className={`text-xs text-center mt-4 transition-all duration-300 ${added ? 'text-green-400 opacity-100' : 'text-gray-600 opacity-0'}`}>
+                                ✓ Item added — <Link to="/cart" className="underline hover:text-green-300">View your cart</Link>
+                            </p>
                         </div>
 
                         <p className="text-xs text-center text-gray-500 mt-4">
