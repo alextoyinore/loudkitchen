@@ -43,6 +43,7 @@ const Settings = () => {
         instagram: '',
         facebook: '',
         twitter: '',
+        opening_hours: '',
     });
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
@@ -93,6 +94,7 @@ const Settings = () => {
                     instagram: data.instagram || '',
                     facebook: data.facebook || '',
                     twitter: data.twitter || '',
+                    opening_hours: data.opening_hours || '',
                 });
             }
             setLoading(false);
@@ -135,6 +137,14 @@ const Settings = () => {
                         <SectionTitle>General</SectionTitle>
                         <Field label="Site Name">
                             <input style={inputStyle} value={form.site_name} onChange={set('site_name')} placeholder="LoudKitchen" />
+                        </Field>
+                        <Field label="Opening Hours">
+                            <textarea
+                                style={{ ...inputStyle, minHeight: '60px', resize: 'vertical' }}
+                                value={form.opening_hours}
+                                onChange={set('opening_hours')}
+                                placeholder="Mon - Fri: 9am - 10pm, Sat - Sun: 10am - 11pm"
+                            />
                         </Field>
                     </div>
 

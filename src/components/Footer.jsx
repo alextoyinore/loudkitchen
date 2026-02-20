@@ -30,6 +30,7 @@ const Footer = () => {
                     <ul style={{ listStyle: 'none' }}>
                         <li className="mb-2"><Link to="/menu">Our Menu</Link></li>
                         <li className="mb-2"><Link to="/gallery">Gallery</Link></li>
+                        <li className="mb-2"><Link to="/reviews">Reviews</Link></li>
                         <li className="mb-2"><Link to="/blog">Blog</Link></li>
                         <li className="mb-2"><Link to="/staff">Meet the Team</Link></li>
                     </ul>
@@ -39,15 +40,15 @@ const Footer = () => {
                 <div className="footer-col">
                     <h4 style={{ color: '#fff', fontSize: '1.1rem', marginBottom: '1.5rem', fontWeight: '600' }}>Contact Us</h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-                        <div className="flex items-start gap-3" style={{ color: 'var(--text-secondary)' }}>
+                        <div className="flex items-start gap-4" style={{ color: 'var(--text-secondary)' }}>
                             <MapPin size={18} className="text-accent" style={{ marginTop: '3px', flexShrink: 0 }} />
                             <span style={{ fontSize: '0.95rem', lineHeight: '1.5' }}>{siteSettings?.address || 'Loading...'}</span>
                         </div>
-                        <div className="flex items-center gap-3" style={{ color: 'var(--text-secondary)' }}>
+                        <div className="flex items-center gap-4" style={{ color: 'var(--text-secondary)' }}>
                             <Phone size={18} className="text-accent" style={{ flexShrink: 0 }} />
                             <span style={{ fontSize: '0.95rem' }}>{siteSettings?.phone || ''}</span>
                         </div>
-                        <div className="flex items-center gap-3" style={{ color: 'var(--text-secondary)' }}>
+                        <div className="flex items-center gap-4" style={{ color: 'var(--text-secondary)' }}>
                             <Mail size={18} className="text-accent" style={{ flexShrink: 0 }} />
                             <span style={{ fontSize: '0.95rem' }}>{siteSettings?.contact_email || ''}</span>
                         </div>
@@ -57,20 +58,21 @@ const Footer = () => {
                 {/* Hours */}
                 <div className="footer-col">
                     <h4>Opening Hours</h4>
-                    <ul style={{ listStyle: 'none', color: 'var(--text-secondary)' }}>
-                        <li className="flex justify-between mb-1">
-                            <span>Mon - Thu:</span>
-                            <span>17:00 - 23:00</span>
-                        </li>
-                        <li className="flex justify-between mb-1">
-                            <span>Fri - Sat:</span>
-                            <span>17:00 - 01:00</span>
-                        </li>
-                        <li className="flex justify-between mb-1">
-                            <span>Sunday:</span>
-                            <span>16:00 - 22:00</span>
-                        </li>
-                    </ul>
+                    <div style={{ color: 'var(--text-secondary)', fontSize: '0.95rem', lineHeight: '1.6' }}>
+                        {siteSettings?.opening_hours ? (
+                            siteSettings.opening_hours.includes(',') ? (
+                                <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                                    {siteSettings.opening_hours.split(',').map((line, i) => (
+                                        <li key={i} style={{ marginBottom: '0.25rem' }}>{line.trim()}</li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p>{siteSettings.opening_hours}</p>
+                            )
+                        ) : (
+                            <p>Loading hours...</p>
+                        )}
+                    </div>
                 </div>
             </div>
 

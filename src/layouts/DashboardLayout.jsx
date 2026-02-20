@@ -20,6 +20,7 @@ const DashboardLayout = () => {
         { name: 'Staff', path: '/admin/staff', icon: <Users size={18} /> },
         { name: 'Gallery', path: '/admin/gallery', icon: <Image size={18} /> },
         { name: 'Bookings', path: '/admin/bookings', icon: <CalendarCheck size={18} /> },
+        { name: 'Reviews', path: '/admin/reviews', icon: <BookOpen size={18} /> },
         ...(isSuperAdmin ? [
             { name: 'Users', path: '/admin/users', icon: <Users size={18} /> },
             { name: 'Settings', path: '/admin/settings', icon: <Settings size={18} /> }
@@ -186,6 +187,8 @@ const DashboardLayout = () => {
 
                     <Link
                         to="/"
+                        target="_blank"
+                        rel="noreferrer"
                         title={isCollapsed ? 'View Site' : ''}
                         style={{
                             display: 'flex',

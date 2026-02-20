@@ -139,7 +139,7 @@ const MenuEditor = () => {
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.4rem' }}>
                                     <h3 style={{ color: '#fff', fontWeight: '600', fontSize: '0.95rem' }}>{item.name}</h3>
                                     <span style={{ color: 'var(--color-accent, #e8b86d)', fontWeight: '700', fontSize: '0.95rem', whiteSpace: 'nowrap', marginLeft: '0.5rem' }}>
-                                        £{parseFloat(item.price).toFixed(2)}
+                                        ₦{parseFloat(item.price).toLocaleString()}
                                     </span>
                                 </div>
                                 <p style={{ color: '#666', fontSize: '0.8rem', marginBottom: '0.75rem', lineHeight: '1.4' }}>{item.description}</p>
@@ -197,7 +197,7 @@ const MenuEditor = () => {
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                 <div>
-                                    <label style={{ display: 'block', color: '#aaa', fontSize: '0.8rem', marginBottom: '0.35rem' }}>Price (£) *</label>
+                                    <label style={{ display: 'block', color: '#aaa', fontSize: '0.8rem', marginBottom: '0.35rem' }}>Price (₦) *</label>
                                     <input style={inputStyle} type="number" step="0.01" min="0" value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))} required />
                                 </div>
                                 <div>

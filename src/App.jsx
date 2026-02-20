@@ -15,6 +15,7 @@ import About from './pages/About';
 import Contact from './pages/Contact';
 import DishDetail from './pages/DishDetail';
 import Staff from './pages/Staff';
+import Reviews from './pages/Reviews';
 
 // Admin Pages
 import AdminLogin from './pages/admin/AdminLogin';
@@ -27,6 +28,7 @@ import GalleryEditor from './pages/admin/GalleryEditor';
 import Bookings from './pages/admin/Bookings';
 import UsersManager from './pages/admin/UsersManager';
 import Settings from './pages/admin/Settings';
+import ReviewManager from './pages/admin/ReviewManager';
 
 function App() {
   return (
@@ -43,6 +45,7 @@ function App() {
         <Route path="about" element={<About />} />
         <Route path="contact" element={<Contact />} />
         <Route path="staff" element={<Staff />} />
+        <Route path="reviews" element={<Reviews />} />
       </Route>
 
       {/* Admin Login & Signup (public) */}
@@ -66,6 +69,7 @@ function App() {
         <Route path="bookings" element={<Bookings />} />
         <Route path="users" element={<ProtectedRoute superAdminOnly={true}><UsersManager /></ProtectedRoute>} />
         <Route path="settings" element={<ProtectedRoute superAdminOnly={true}><Settings /></ProtectedRoute>} />
+        <Route path="reviews" element={<ReviewManager />} />
       </Route>
     </Routes>
   );

@@ -1,8 +1,79 @@
-﻿import React from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
-import { ArrowRight, Star } from 'lucide-react';
+import { ArrowRight, Star, Quote } from 'lucide-react';
 import heroVideo from '../assets/hero_vid.mp4';
+import { supabase } from '../lib/supabase';
+
+const FeaturedReviews = () => {
+    const [reviews, setReviews] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchFeatured = async () => {
+            const { data } = await supabase
+                .from('reviews')
+                .select('*')
+                .eq('is_featured', true)
+                .limit(3);
+            if (data) setReviews(data);
+            setLoading(false);
+        };
+        fetchFeatured();
+    }, []);
+
+    if (loading) return null;
+    if (reviews.length === 0) return (
+        <section className="section bg-secondary text-center">
+            <div className="container">
+                <div className="flex justify-center gap-1 text-accent mb-4">
+                    <Star fill="currentColor" />
+                    <Star fill="currentColor" />
+                    <Star fill="currentColor" />
+                    <Star fill="currentColor" />
+                    <Star fill="currentColor" />
+                </div>
+                <h2 className="text-3xl mb-8">"The vibe is unmatched."</h2>
+                <p className="text-gray-400">- Food & Wine Magazine</p>
+            </div>
+        </section>
+    );
+
+    return (
+        <section className="section bg-secondary overflow-hidden">
+            <div className="container">
+                <div className="text-center mb-16">
+                    <h2 className="text-4xl md:text-5xl mb-4">Guest <span className="text-accent">Testimonials</span></h2>
+                    <p className="text-gray-400">What people are saying about their LoudKitchen experience.</p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    {reviews.map(review => (
+                        <div key={review.id} className="bg-primary p-8 rounded-3xl relative border border-white/5 hover:border-accent/20 transition-all duration-300">
+                            <Quote size={40} className="absolute top-4 right-8 opacity-5 text-accent" />
+                            <div className="flex gap-1 mb-6">
+                                {[...Array(review.rating)].map((_, i) => <Star key={i} size={14} fill="var(--color-accent, #e8b86d)" color="var(--color-accent, #e8b86d)" />)}
+                            </div>
+                            <p className="text-gray-300 mb-8 italic leading-relaxed">"{review.feedback}"</p>
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-accent text-black flex items-center justify-center font-bold">
+                                    {review.name[0].toUpperCase()}
+                                </div>
+                                <h4 className="font-bold text-white uppercase tracking-wider text-xs">{review.name}</h4>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                <div className="text-center mt-12">
+                    <Link to="/reviews" className="inline-flex items-center gap-2 text-accent hover:underline font-medium">
+                        Read All Reviews <ArrowRight size={16} />
+                    </Link>
+                </div>
+            </div>
+        </section>
+    );
+};
 
 const Home = () => {
     const { siteSettings, menuItems } = useData();
@@ -141,19 +212,7 @@ const Home = () => {
             </section>
 
             {/* Reviews / Social Proof */}
-            <section className="section bg-secondary">
-                <div className="container text-center">
-                    <div className="flex justify-center gap-1 text-accent mb-4">
-                        <Star fill="currentColor" />
-                        <Star fill="currentColor" />
-                        <Star fill="currentColor" />
-                        <Star fill="currentColor" />
-                        <Star fill="currentColor" />
-                    </div>
-                    <h2 className="text-3xl mb-8">"The vibe is unmatched."</h2>
-                    <p className="text-gray-400">- Food & Wine Magazine</p>
-                </div>
-            </section>
+            <FeaturedReviews />
 
 
         </div>

@@ -33,6 +33,7 @@ const Navbar = () => {
         { name: 'Menu', path: '/menu' },
         { name: 'Book a Table', path: '/book' },
         { name: 'Gallery', path: '/gallery' },
+        { name: 'Reviews', path: '/reviews' },
         { name: 'Blog', path: '/blog' },
         { name: 'About', path: '/about' },
         { name: 'Contact', path: '/contact' },
