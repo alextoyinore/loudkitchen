@@ -16,6 +16,8 @@ import Contact from './pages/Contact';
 import DishDetail from './pages/DishDetail';
 import Staff from './pages/Staff';
 import Reviews from './pages/Reviews';
+import Cart from './pages/Cart';
+import Checkout from './pages/Checkout';
 
 // Admin Pages
 import AdminLogin from './pages/admin/AdminLogin';
@@ -29,6 +31,7 @@ import Bookings from './pages/admin/Bookings';
 import UsersManager from './pages/admin/UsersManager';
 import Settings from './pages/admin/Settings';
 import ReviewManager from './pages/admin/ReviewManager';
+import OrderManager from './pages/admin/OrderManager';
 
 function App() {
   return (
@@ -46,6 +49,8 @@ function App() {
         <Route path="contact" element={<Contact />} />
         <Route path="staff" element={<Staff />} />
         <Route path="reviews" element={<Reviews />} />
+        <Route path="cart" element={<Cart />} />
+        <Route path="checkout" element={<Checkout />} />
       </Route>
 
       {/* Admin Login & Signup (public) */}
@@ -70,6 +75,7 @@ function App() {
         <Route path="users" element={<ProtectedRoute superAdminOnly={true}><UsersManager /></ProtectedRoute>} />
         <Route path="settings" element={<ProtectedRoute superAdminOnly={true}><Settings /></ProtectedRoute>} />
         <Route path="reviews" element={<ReviewManager />} />
+        <Route path="orders" element={<OrderManager />} />
       </Route>
     </Routes>
   );

@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ShoppingBag } from 'lucide-react';
+import { useCart } from '../context/CartContext';
 import logoLight from '../assets/logo_light.png';
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const location = useLocation();
+    const { cartCount } = useCart();
 
     // Handle scroll effect
     React.useEffect(() => {
@@ -64,10 +66,27 @@ const Navbar = () => {
                             {link.name}
                         </Link>
                     ))}
+
+                    <Link to="/cart" className="relative p-2 text-white hover:text-accent transition-all duration-300 ml-4 flex items-center group">
+                        <ShoppingBag size={24} className="group-hover:scale-110 transition-transform" />
+                        {cartCount > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-[0_0_12px_rgba(220,38,38,0.4)]">
+                                {cartCount}
+                            </span>
+                        )}
+                    </Link>
                 </div>
 
                 {/* Mobile Toggle */}
-                <div className="mobile-toggle">
+                <div className="mobile-toggle flex items-center gap-4">
+                    <Link to="/cart" className="relative p-2 text-white flex items-center">
+                        <ShoppingBag size={24} />
+                        {cartCount > 0 && (
+                            <span className="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center shadow-[0_0_12px_rgba(220,38,38,0.4)]">
+                                {cartCount}
+                            </span>
+                        )}
+                    </Link>
                     <button onClick={toggleMenu} aria-label="Toggle menu">
                         {isOpen ? <X size={28} /> : <Menu size={28} />}
                     </button>

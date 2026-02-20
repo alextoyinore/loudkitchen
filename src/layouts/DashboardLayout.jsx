@@ -2,7 +2,8 @@ import React from 'react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import {
     LayoutDashboard, Utensils, BookOpen, Settings,
-    Home, LogOut, Users, Image, ChevronRight, CalendarCheck
+    Home, LogOut, Users, Image, ChevronRight, CalendarCheck,
+    ShoppingBag
 } from 'lucide-react';
 import { useAuth } from '../context/useAuth';
 import logoLight from '../assets/logo_light.png';
@@ -20,6 +21,7 @@ const DashboardLayout = () => {
         { name: 'Staff', path: '/admin/staff', icon: <Users size={18} /> },
         { name: 'Gallery', path: '/admin/gallery', icon: <Image size={18} /> },
         { name: 'Bookings', path: '/admin/bookings', icon: <CalendarCheck size={18} /> },
+        { name: 'Orders', path: '/admin/orders', icon: <ShoppingBag size={18} /> },
         { name: 'Reviews', path: '/admin/reviews', icon: <BookOpen size={18} /> },
         ...(isSuperAdmin ? [
             { name: 'Users', path: '/admin/users', icon: <Users size={18} /> },

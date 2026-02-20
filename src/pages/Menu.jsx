@@ -72,7 +72,7 @@ const Menu = () => {
                             {/* Content Container */}
                             <div className="p-6">
                                 <div className="mb-4">
-                                    <h3 className="text-2xl font-heading uppercase tracking-wide mb-2 group-hover:text-accent transition-colors">
+                                    <h3 className="text-2xl font-heading mb-2 group-hover:text-accent transition-colors">
                                         {item.name}
                                     </h3>
                                     <p className="text-gray-400 text-sm line-clamp-3 leading-relaxed">

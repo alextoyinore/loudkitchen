@@ -1,12 +1,14 @@
 import React from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
-import { ArrowLeft, Clock, CheckCircle, XCircle } from 'lucide-react';
+import { useCart } from '../context/CartContext';
+import { ArrowLeft, Clock, CheckCircle, XCircle, Share2, ShoppingBag } from 'lucide-react';
 
 const DishDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { menuItems } = useData();
+    const { addToCart } = useCart();
 
     const dish = menuItems.find(item => String(item.id) === id);
 
@@ -41,7 +43,7 @@ const DishDetail = () => {
                             alt={dish.name}
                             className="w-full h-full object-cover"
                         />
-                        <div className="absolute top-4 right-4 bg-black-70 backdrop-blur-md px-4 py-2 rounded-lg border border-white-10">
+                        <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-md px-4 py-2 rounded-lg border border-white/10">
                             <span className="text-accent font-bold text-xl">₦{dish.price}</span>
                         </div>
                     </div>
@@ -49,7 +51,7 @@ const DishDetail = () => {
                     {/* Right Column: Details */}
                     <div className="space-y-8">
                         <div>
-                            <span className="inline-block px-3 py-1 bg-accent-10 text-accent border border-accent-20 rounded-full text-xs font-bold tracking-wider uppercase mb-4">
+                            <span className="inline-block px-3 py-1 bg-accent/10 text-accent border border-accent/20 rounded-full text-xs font-bold tracking-wider uppercase mb-4">
                                 {dish.category}
                             </span>
                             <h1 className="text-4xl md:text-5xl font-heading mb-4 leading-tight">{dish.name}</h1>
@@ -81,16 +83,37 @@ const DishDetail = () => {
                             </p>
                         </div>
 
-                        <div className="bg-secondary p-6 rounded-xl border border-gray-800">
-                            <p className="text-gray-300 italic mb-4">
+                        <div className="bg-secondary p-8 rounded-xl border border-gray-800">
+                            <p className="text-gray-300 italic mb-8">
                                 "Our chefs recommend pairing this with a light white wine or our signature cocktail."
                             </p>
-                            <div className="flex gap-4 border-gray-700-50">
-                                <button className="flex-1 btn btn-primary py-3">
+
+                            <div className="flex flex-row gap-4 items-center">
+                                <button
+                                    onClick={() => addToCart(dish, 1)}
+                                    className="flex-[2] btn btn-primary py-4 font-bold tracking-wider flex items-center justify-center gap-3"
+                                >
+                                    <ShoppingBag size={20} />
                                     Add to Order
                                 </button>
-                                <button className="flex-1 btn btn-outline py-3">
-                                    Share
+
+                                <button
+                                    className="flex-1 btn btn-outline py-4 flex items-center justify-center gap-2 group/share"
+                                    onClick={() => {
+                                        if (navigator.share) {
+                                            navigator.share({
+                                                title: dish.name,
+                                                text: dish.description,
+                                                url: window.location.href,
+                                            }).catch(console.error);
+                                        } else {
+                                            navigator.clipboard.writeText(window.location.href);
+                                            alert('Link copied to clipboard!');
+                                        }
+                                    }}
+                                >
+                                    <Share2 size={18} className="group-hover/share:scale-110 transition-transform" />
+                                    <span className="hidden sm:inline">Share</span>
                                 </button>
                             </div>
                         </div>
