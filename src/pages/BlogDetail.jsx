@@ -8,8 +8,7 @@ const BlogDetail = () => {
     const navigate = useNavigate();
     const { blogPosts } = useData();
 
-    // Convert id to number
-    const post = blogPosts.find(item => item.id === parseInt(id));
+    const post = blogPosts.find(item => String(item.id) === id);
 
     if (!post) {
         return (
@@ -34,7 +33,7 @@ const BlogDetail = () => {
                     {/* Header */}
                     <header className="mb-12">
                         <div className="flex gap-6 text-sm font-medium text-accent mb-4 uppercase tracking-wider">
-                            <span>{post.date}</span>
+                            <span>{post.created_at ? new Date(post.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : ''}</span>
                             <span>By {post.author}</span>
                         </div>
                         <h1 className="text-4xl md:text-6xl font-heading mb-8 leading-tight">{post.title}</h1>
@@ -43,7 +42,7 @@ const BlogDetail = () => {
                     {/* Hero Image */}
                     <div className="rounded-2xl overflow-hidden mb-16 shadow-2xl">
                         <img
-                            src={post.image}
+                            src={post.cover_image}
                             alt={post.title}
                             className="w-full h-auto object-cover max-h-[200px]"
                         />
@@ -86,7 +85,7 @@ const BlogDetail = () => {
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                             {blogPosts.filter(p => p.id !== post.id).slice(0, 3).map(related => (
                                 <Link to={`/blog/${related.id}`} key={related.id} className="group block bg-secondary/50 rounded-2xl overflow-hidden p-6 border border-gray-800 hover:border-accent hover:bg-secondary transition-all">
-                                    <p className="text-[10px] text-accent uppercase tracking-widest mb-3 font-bold">{related.date}</p>
+                                    <p className="text-[10px] text-accent uppercase tracking-widest mb-3 font-bold">{related.created_at ? new Date(related.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : ''}</p>
                                     <h4 className="font-heading text-xl group-hover:text-white transition-colors mb-2 line-clamp-2 leading-snug">{related.title}</h4>
                                 </Link>
                             ))}

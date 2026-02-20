@@ -17,7 +17,7 @@ const Staff = () => {
                         <div key={member.id} className="staff-card bg-secondary p-8 rounded-lg border border-gray-800 text-center hover:border-accent transition-all duration-300 hover:transform hover:-translate-y-2">
                             <div className="w-32 h-32 mx-auto rounded-full overflow-hidden mb-6 border-2 border-accent">
                                 <img
-                                    src={member.image}
+                                    src={member.image_url}
                                     alt={member.name}
                                     className="w-full h-full object-cover"
                                 />

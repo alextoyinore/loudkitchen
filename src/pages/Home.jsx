@@ -11,7 +11,21 @@ const Home = () => {
     const featuredItems = menuItems.slice(0, 3);
 
     // Use siteSettings video if available, otherwise fallback to local asset
-    const videoSource = siteSettings?.heroVideoUrl || heroVideo;
+    const videoSource = siteSettings?.hero_video_url || heroVideo;
+
+    // Helper to style bracketed text (e.g. LOUD[KITCHEN] -> LOUD<span class="text-accent">KITCHEN</span>)
+    const renderStyledText = (text, defaultContent) => {
+        if (!text) return defaultContent;
+        const parts = text.split(/\[(.*?)\]/);
+        if (parts.length < 2) return text;
+        return (
+            <>
+                {parts[0]}
+                <span className="text-accent">{parts[1]}</span>
+                {parts[2]}
+            </>
+        );
+    };
 
     return (
         <div className="home-page">
@@ -34,10 +48,10 @@ const Home = () => {
 
                 <div className="relative z-10 text-center container">
                     <h1 className="text-6xl md:text-8xl font-bold mb-4 tracking-tight animate-fade-in-up">
-                        LOUD<span className="text-accent">KITCHEN</span>
+                        {renderStyledText(siteSettings?.hero_title, <>LOUD<span className="text-accent">KITCHEN</span></>)}
                     </h1>
                     <p className="text-xl md:text-2xl mb-8 max-w-2xl mx-auto text-gray-300">
-                        A symphony of flavors in a vibrant atmosphere.
+                        {siteSettings?.hero_subtitle || 'A symphony of flavors in a vibrant atmosphere.'}
                     </p>
                     <div className="flex gap-4 justify-center">
                         <Link to="/book" className="btn btn-primary">Book a Table</Link>
@@ -49,14 +63,14 @@ const Home = () => {
             {/* Intro Section */}
             <section className="section bg-secondary text-center">
                 <div className="container">
-                    <h2 className="text-4xl mb-6">Taste the <span className="text-accent">Rhythm</span></h2>
+                    <h2 className="text-4xl mb-6">
+                        {renderStyledText(siteSettings?.about_title, <>Taste the <span className="text-accent">Rhythm</span></>)}
+                    </h2>
                     <p className="max-w-3xl mx-auto text-lg text-gray-400 mb-10">
-                        At Loudkitchen, we believe dining is an experience that engages all senses.
-                        From our carefully curated playlists to our visually stunning dishes,
-                        every detail is designed to amplify your evening.
+                        {siteSettings?.about_text || 'At Loudkitchen, we believe dining is an experience that engages all senses. From our carefully curated playlists to our visually stunning dishes, every detail is designed to amplify your evening.'}
                     </p>
                     <img
-                        src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1200"
+                        src={siteSettings?.about_image_url || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1200"}
                         alt="Restaurant Interior"
                         className="w-full h-96 object-cover rounded-lg shadow-2xl opacity-80"
                     />
@@ -81,7 +95,7 @@ const Home = () => {
                             <Link to={`/menu/${item.id}`} key={item.id} className="menu-card bg-secondary p-4 rounded-lg hover:transform hover:-translate-y-2 transition-transform duration-300 block">
                                 <div className="relative h-64 mb-4 overflow-hidden rounded">
                                     <img
-                                        src={item.image}
+                                        src={item.image_url}
                                         alt={item.name}
                                         className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
                                     />

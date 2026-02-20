@@ -19,7 +19,7 @@ const Contact = () => {
                             </div>
                             <div>
                                 <h3 className="text-xl mb-2">Location</h3>
-                                <p className="text-gray-400">{siteSettings.address}</p>
+                                <p className="text-gray-400">{siteSettings?.address || 'Loading...'}</p>
                             </div>
                         </div>
 
@@ -29,7 +29,7 @@ const Contact = () => {
                             </div>
                             <div>
                                 <h3 className="text-xl mb-2">Phone</h3>
-                                <p className="text-gray-400">{siteSettings.phone}</p>
+                                <p className="text-gray-400">{siteSettings?.phone || ''}</p>
                             </div>
                         </div>
 
@@ -39,7 +39,7 @@ const Contact = () => {
                             </div>
                             <div>
                                 <h3 className="text-xl mb-2">Email</h3>
-                                <p className="text-gray-400">{siteSettings.contactEmail}</p>
+                                <p className="text-gray-400">{siteSettings?.contactEmail || ''}</p>
                             </div>
                         </div>
 

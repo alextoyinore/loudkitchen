@@ -1,133 +1,243 @@
-﻿import React, { useState } from 'react';
-import { useData } from '../../context/DataContext';
-import { Edit, Trash, Plus, X } from 'lucide-react';
+﻿import React, { useEffect, useState } from 'react';
+import { supabase } from '../../lib/supabase';
+import { uploadToCloudinary } from '../../lib/cloudinary';
+import { Plus, Pencil, Trash2, X, Save, ImagePlus, Loader, Eye, EyeOff } from 'lucide-react';
+
+const emptyForm = { title: '', slug: '', excerpt: '', content: '', cover_image: '', author: '', tags: '', published: false };
+
+const inputStyle = {
+    width: '100%', background: 'rgba(255,255,255,0.06)',
+    border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px',
+    padding: '0.65rem 0.85rem', color: '#fff', fontSize: '0.9rem',
+    outline: 'none', boxSizing: 'border-box',
+};
+
+const slugify = (str) => str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
 const BlogEditor = () => {
-    const { blogPosts, addBlogPost } = useData();
-    const [isEditing, setIsEditing] = useState(false);
+    const [posts, setPosts] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [showForm, setShowForm] = useState(false);
+    const [form, setForm] = useState(emptyForm);
+    const [editId, setEditId] = useState(null);
+    const [saving, setSaving] = useState(false);
+    const [uploading, setUploading] = useState(false);
+    const [error, setError] = useState('');
 
-    // For now, we only support adding new posts in this simple mock
-    // In a real app, we'd have full edit capability similar to MenuEditor
-
-    const initialFormState = {
-        title: '',
-        excerpt: '',
-        content: '',
-        image: '',
-        author: 'Admin'
+    const fetchPosts = async () => {
+        const { data } = await supabase.from('blog_posts').select('*').order('created_at', { ascending: false });
+        setPosts(data || []);
+        setLoading(false);
     };
 
-    const [formData, setFormData] = useState(initialFormState);
+    useEffect(() => { fetchPosts(); }, []);
 
-    const handleSubmit = (e) => {
+    const openAdd = () => { setForm(emptyForm); setEditId(null); setError(''); setShowForm(true); };
+    const openEdit = (post) => {
+        setForm({ ...post, tags: Array.isArray(post.tags) ? post.tags.join(', ') : '' });
+        setEditId(post.id); setError(''); setShowForm(true);
+    };
+    const closeForm = () => { setShowForm(false); setEditId(null); setForm(emptyForm); };
+
+    const handleTitleChange = (e) => {
+        const title = e.target.value;
+        setForm(f => ({ ...f, title, slug: editId ? f.slug : slugify(title) }));
+    };
+
+    const handleImageUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setError('');
+        const limit = 500 * 1024; // 500KB
+        if (file.size > limit) {
+            setError('Image file is too large. Max limit is 500KB.');
+            return;
+        }
+
+        setUploading(true);
+        try {
+            const url = await uploadToCloudinary(file, 'loudkitchen/blog');
+            setForm(f => ({ ...f, cover_image: url }));
+        } catch (err) {
+            setError('Image upload failed: ' + err.message);
+        } finally {
+            setUploading(false);
+        }
+    };
+
+    const handleSave = async (e) => {
         e.preventDefault();
-        addBlogPost(formData);
-        closeModal();
+        setError('');
+        setSaving(true);
+        const payload = {
+            ...form,
+            tags: form.tags ? form.tags.split(',').map(t => t.trim()).filter(Boolean) : [],
+        };
+        let err;
+        if (editId) {
+            ({ error: err } = await supabase.from('blog_posts').update(payload).eq('id', editId));
+        } else {
+            ({ error: err } = await supabase.from('blog_posts').insert(payload));
+        }
+        setSaving(false);
+        if (err) { setError(err.message); return; }
+        closeForm();
+        fetchPosts();
     };
 
-    const closeModal = () => {
-        setIsEditing(false);
-        setFormData(initialFormState);
+    const handleDelete = async (id) => {
+        if (!confirm('Delete this blog post?')) return;
+        await supabase.from('blog_posts').delete().eq('id', id);
+        fetchPosts();
+    };
+
+    const togglePublish = async (post) => {
+        await supabase.from('blog_posts').update({ published: !post.published }).eq('id', post.id);
+        fetchPosts();
     };
 
     return (
         <div>
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold">Blog Management</h1>
-                <button
-                    onClick={() => setIsEditing(true)}
-                    className="bg-accent text-black px-4 py-2 rounded flex items-center gap-2 font-bold"
-                >
-                    <Plus size={20} /> New Post
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <div>
+                    <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#fff' }}>Blog Posts</h1>
+                    <p style={{ color: '#666', fontSize: '0.875rem', marginTop: '0.2rem' }}>{posts.length} posts total</p>
+                </div>
+                <button onClick={openAdd} style={{
+                    display: 'flex', alignItems: 'center', gap: '0.5rem',
+                    background: 'var(--color-accent, #e8b86d)', color: '#000',
+                    fontWeight: '700', padding: '0.65rem 1.25rem', borderRadius: '8px',
+                    border: 'none', cursor: 'pointer', fontSize: '0.9rem',
+                }}>
+                    <Plus size={18} /> New Post
                 </button>
             </div>
 
-            <div className="space-y-4">
-                {blogPosts.map(post => (
-                    <div key={post.id} className="bg-gray-800 p-4 rounded-lg flex gap-4 items-start">
-                        <div className="w-24 h-24 flex-shrink-0 bg-gray-700 rounded overflow-hidden">
-                            <img src={post.image} alt={post.title} className="w-full h-full object-cover" />
+            {loading ? (
+                <div style={{ textAlign: 'center', color: '#555', padding: '3rem' }}>Loading…</div>
+            ) : posts.length === 0 ? (
+                <div style={{ textAlign: 'center', color: '#555', padding: '3rem' }}>No posts yet.</div>
+            ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {posts.map(post => (
+                        <div key={post.id} style={{
+                            background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.07)',
+                            borderRadius: '12px', padding: '1.25rem',
+                            display: 'flex', alignItems: 'center', gap: '1rem',
+                        }}>
+                            {post.cover_image ? (
+                                <img src={post.cover_image} alt={post.title} style={{ width: '80px', height: '60px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} />
+                            ) : (
+                                <div style={{ width: '80px', height: '60px', background: '#222', borderRadius: '8px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#444' }}>
+                                    <ImagePlus size={20} />
+                                </div>
+                            )}
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                                <h3 style={{ color: '#fff', fontWeight: '600', fontSize: '0.95rem', marginBottom: '0.2rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{post.title}</h3>
+                                <p style={{ color: '#555', fontSize: '0.8rem' }}>/{post.slug} · {post.author || 'Unknown'}</p>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
+                                <span style={{
+                                    fontSize: '0.75rem', padding: '0.2rem 0.65rem', borderRadius: '999px',
+                                    background: post.published ? 'rgba(34,197,94,0.15)' : 'rgba(255,255,255,0.07)',
+                                    color: post.published ? '#4ade80' : '#666',
+                                }}>
+                                    {post.published ? 'Published' : 'Draft'}
+                                </span>
+                                <button onClick={() => togglePublish(post)} title={post.published ? 'Unpublish' : 'Publish'} style={{ background: 'rgba(255,255,255,0.07)', border: 'none', borderRadius: '6px', padding: '0.4rem', color: '#aaa', cursor: 'pointer' }}>
+                                    {post.published ? <EyeOff size={14} /> : <Eye size={14} />}
+                                </button>
+                                <button onClick={() => openEdit(post)} style={{ background: 'rgba(255,255,255,0.07)', border: 'none', borderRadius: '6px', padding: '0.4rem', color: '#aaa', cursor: 'pointer' }}>
+                                    <Pencil size={14} />
+                                </button>
+                                <button onClick={() => handleDelete(post.id)} style={{ background: 'rgba(239,68,68,0.1)', border: 'none', borderRadius: '6px', padding: '0.4rem', color: '#f87171', cursor: 'pointer' }}>
+                                    <Trash2 size={14} />
+                                </button>
+                            </div>
                         </div>
-                        <div className="flex-1">
-                            <h3 className="text-xl font-bold mb-1">{post.title}</h3>
-                            <p className="text-sm text-gray-400 mb-2">{post.date} by {post.author}</p>
-                            <p className="text-gray-300">{post.excerpt}</p>
-                        </div>
-                    </div>
-                ))}
-            </div>
+                    ))}
+                </div>
+            )}
 
-            {/* Modal */}
-            {isEditing && (
-                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-                    <div className="bg-gray-800 p-6 rounded-lg w-full max-w-2xl relative max-h-[90vh] overflow-y-auto">
-                        <button
-                            onClick={closeModal}
-                            className="absolute top-4 right-4 text-gray-400 hover:text-white"
-                        >
-                            <X />
-                        </button>
-
-                        <h2 className="text-2xl font-bold mb-6">Create New Post</h2>
-
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div>
-                                <label className="block text-sm text-gray-400 mb-1">Title</label>
-                                <input
-                                    type="text"
-                                    value={formData.title}
-                                    onChange={e => setFormData({ ...formData, title: e.target.value })}
-                                    className="w-full bg-gray-700 border-gray-600 rounded p-2 text-white"
-                                    required
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm text-gray-400 mb-1">Image URL</label>
-                                <input
-                                    type="text"
-                                    value={formData.image}
-                                    onChange={e => setFormData({ ...formData, image: e.target.value })}
-                                    className="w-full bg-gray-700 border-gray-600 rounded p-2 text-white"
-                                    placeholder="https://..."
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm text-gray-400 mb-1">Excerpt</label>
-                                <textarea
-                                    value={formData.excerpt}
-                                    onChange={e => setFormData({ ...formData, excerpt: e.target.value })}
-                                    className="w-full bg-gray-700 border-gray-600 rounded p-2 text-white"
-                                    rows="2"
-                                    required
-                                ></textarea>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm text-gray-400 mb-1">Content</label>
-                                <textarea
-                                    value={formData.content}
-                                    onChange={e => setFormData({ ...formData, content: e.target.value })}
-                                    className="w-full bg-gray-700 border-gray-600 rounded p-2 text-white font-mono"
-                                    rows="10"
-                                    required
-                                ></textarea>
-                            </div>
-
-                            <div>
-                                <label className="block text-sm text-gray-400 mb-1">Author</label>
-                                <input
-                                    type="text"
-                                    value={formData.author}
-                                    onChange={e => setFormData({ ...formData, author: e.target.value })}
-                                    className="w-full bg-gray-700 border-gray-600 rounded p-2 text-white"
-                                />
-                            </div>
-
-                            <button type="submit" className="w-full bg-accent text-black font-bold py-2 rounded mt-4">
-                                Publish Post
+            {/* Modal Form */}
+            {showForm && (
+                <div style={{
+                    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    zIndex: 1000, padding: '1rem',
+                }}>
+                    <div style={{
+                        background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '600px',
+                        maxHeight: '90vh', overflowY: 'auto',
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <h2 style={{ color: '#fff', fontWeight: '700', fontSize: '1.1rem' }}>
+                                {editId ? 'Edit Post' : 'New Blog Post'}
+                            </h2>
+                            <button onClick={closeForm} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer' }}>
+                                <X size={20} />
                             </button>
+                        </div>
+
+                        {error && <div style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px', padding: '0.75rem', color: '#f87171', fontSize: '0.85rem', marginBottom: '1rem' }}>{error}</div>}
+
+                        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <div>
+                                <label style={{ display: 'block', color: '#aaa', fontSize: '0.8rem', marginBottom: '0.35rem' }}>Title *</label>
+                                <input style={inputStyle} value={form.title} onChange={handleTitleChange} required />
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', color: '#aaa', fontSize: '0.8rem', marginBottom: '0.35rem' }}>Slug *</label>
+                                <input style={inputStyle} value={form.slug} onChange={e => setForm(f => ({ ...f, slug: e.target.value }))} required />
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                                <div>
+                                    <label style={{ display: 'block', color: '#aaa', fontSize: '0.8rem', marginBottom: '0.35rem' }}>Author</label>
+                                    <input style={inputStyle} value={form.author} onChange={e => setForm(f => ({ ...f, author: e.target.value }))} />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', color: '#aaa', fontSize: '0.8rem', marginBottom: '0.35rem' }}>Tags (comma-separated)</label>
+                                    <input style={inputStyle} value={form.tags} onChange={e => setForm(f => ({ ...f, tags: e.target.value }))} placeholder="food, recipe, tips" />
+                                </div>
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', color: '#aaa', fontSize: '0.8rem', marginBottom: '0.35rem' }}>Excerpt</label>
+                                <textarea style={{ ...inputStyle, minHeight: '70px', resize: 'vertical' }} value={form.excerpt} onChange={e => setForm(f => ({ ...f, excerpt: e.target.value }))} />
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', color: '#aaa', fontSize: '0.8rem', marginBottom: '0.35rem' }}>Content</label>
+                                <textarea style={{ ...inputStyle, minHeight: '140px', resize: 'vertical' }} value={form.content} onChange={e => setForm(f => ({ ...f, content: e.target.value }))} />
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', color: '#aaa', fontSize: '0.8rem', marginBottom: '0.35rem' }}>Cover Image</label>
+                                {form.cover_image && <img src={form.cover_image} alt="" style={{ width: '100%', height: '140px', objectFit: 'cover', borderRadius: '8px', marginBottom: '0.5rem' }} />}
+                                <label style={{
+                                    display: 'flex', alignItems: 'center', gap: '0.5rem',
+                                    padding: '0.65rem', borderRadius: '8px',
+                                    border: '1px dashed rgba(255,255,255,0.2)',
+                                    color: '#aaa', cursor: 'pointer', fontSize: '0.85rem',
+                                }}>
+                                    {uploading ? <><Loader size={16} /> Uploading…</> : <><ImagePlus size={16} /> Upload Cover Image</>}
+                                    <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageUpload} disabled={uploading} />
+                                </label>
+                            </div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <input type="checkbox" id="published" checked={form.published} onChange={e => setForm(f => ({ ...f, published: e.target.checked }))} />
+                                <label htmlFor="published" style={{ color: '#aaa', fontSize: '0.875rem' }}>Publish immediately</label>
+                            </div>
+                            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+                                <button type="button" onClick={closeForm} style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.12)', background: 'none', color: '#aaa', cursor: 'pointer' }}>Cancel</button>
+                                <button type="submit" disabled={saving || uploading} style={{
+                                    flex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                                    padding: '0.75rem', borderRadius: '8px', border: 'none',
+                                    background: 'var(--color-accent, #e8b86d)', color: '#000',
+                                    fontWeight: '700', cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.7 : 1,
+                                }}>
+                                    <Save size={16} /> {saving ? 'Saving…' : 'Save Post'}
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>

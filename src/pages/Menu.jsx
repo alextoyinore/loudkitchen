@@ -59,7 +59,7 @@ const Menu = () => {
                             {/* Image Container */}
                             <div className="relative h-64 overflow-hidden">
                                 <img
-                                    src={item.image}
+                                    src={item.image_url}
                                     alt={item.name}
                                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                 />
@@ -81,11 +81,11 @@ const Menu = () => {
                                 </div>
 
                                 <div className="flex justify-between items-center pt-4">
-                                    <span className={`text-xs px-2.5 py-1 rounded-full ${item.available
+                                    <span className={`text-xs px-2.5 py-1 rounded-full ${item.is_available
                                         ? 'text-green-400 bg-green-500/10'
                                         : 'text-red-400 bg-red-500/10'
                                         }`}>
-                                        {item.available ? 'In Stock' : 'Sold Out'}
+                                        {item.is_available ? 'In Stock' : 'Sold Out'}
                                     </span>
 
                                     <span className="text-accent text-sm font-medium flex items-center gap-1 group-hover:translate-x-1 transition-transform">

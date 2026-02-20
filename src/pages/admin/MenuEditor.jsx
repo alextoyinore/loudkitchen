@@ -1,183 +1,240 @@
-﻿import React, { useState } from 'react';
-import { useData } from '../../context/DataContext';
-import { Edit, Trash, Plus, X } from 'lucide-react';
+﻿import React, { useEffect, useState } from 'react';
+import { supabase } from '../../lib/supabase';
+import { uploadToCloudinary } from '../../lib/cloudinary';
+import { Plus, Pencil, Trash2, X, Save, ImagePlus, Loader } from 'lucide-react';
+
+const CATEGORIES = ['Starters', 'Mains', 'Desserts', 'Drinks', 'Specials'];
+
+const emptyForm = { name: '', description: '', price: '', category: 'Mains', image_url: '', is_available: true };
+
+const inputStyle = {
+    width: '100%', background: 'rgba(255,255,255,0.06)',
+    border: '1px solid rgba(255,255,255,0.12)', borderRadius: '8px',
+    padding: '0.65rem 0.85rem', color: '#fff', fontSize: '0.9rem',
+    outline: 'none', boxSizing: 'border-box',
+};
 
 const MenuEditor = () => {
-    const { menuItems, addMenuItem, updateMenuItem, deleteMenuItem } = useData();
-    const [isEditing, setIsEditing] = useState(false);
-    const [currentItem, setCurrentItem] = useState(null);
+    const [items, setItems] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [showForm, setShowForm] = useState(false);
+    const [form, setForm] = useState(emptyForm);
+    const [editId, setEditId] = useState(null);
+    const [saving, setSaving] = useState(false);
+    const [uploading, setUploading] = useState(false);
+    const [error, setError] = useState('');
+    const [filterCat, setFilterCat] = useState('All');
 
-    const initialFormState = {
-        name: '',
-        category: 'Mains',
-        price: '',
-        description: '',
-        image: '',
-        available: true
+    const fetchItems = async () => {
+        const { data } = await supabase.from('menu_items').select('*').order('created_at', { ascending: false });
+        setItems(data || []);
+        setLoading(false);
     };
 
-    const [formData, setFormData] = useState(initialFormState);
+    useEffect(() => { fetchItems(); }, []);
 
-    const handleEdit = (item) => {
-        setIsEditing(true);
-        setCurrentItem(item);
-        setFormData(item);
-    };
+    const openAdd = () => { setForm(emptyForm); setEditId(null); setError(''); setShowForm(true); };
+    const openEdit = (item) => { setForm({ ...item, price: String(item.price) }); setEditId(item.id); setError(''); setShowForm(true); };
+    const closeForm = () => { setShowForm(false); setEditId(null); setForm(emptyForm); };
 
-    const handleDelete = (id) => {
-        if (window.confirm('Are you sure you want to delete this item?')) {
-            deleteMenuItem(id);
+    const handleImageUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setError('');
+        const limit = 500 * 1024; // 500KB
+        if (file.size > limit) {
+            setError('Image file is too large. Max limit is 500KB.');
+            return;
+        }
+
+        setUploading(true);
+        try {
+            const url = await uploadToCloudinary(file, 'loudkitchen/menu');
+            setForm(f => ({ ...f, image_url: url }));
+        } catch (err) {
+            setError('Image upload failed: ' + err.message);
+        } finally {
+            setUploading(false);
         }
     };
 
-    const handleSubmit = (e) => {
+    const handleSave = async (e) => {
         e.preventDefault();
-        if (currentItem) {
-            updateMenuItem(currentItem.id, formData);
+        setError('');
+        setSaving(true);
+        const payload = { ...form, price: parseFloat(form.price) };
+        let err;
+        if (editId) {
+            ({ error: err } = await supabase.from('menu_items').update(payload).eq('id', editId));
         } else {
-            addMenuItem(formData);
+            ({ error: err } = await supabase.from('menu_items').insert(payload));
         }
-        closeModal();
+        setSaving(false);
+        if (err) { setError(err.message); return; }
+        closeForm();
+        fetchItems();
     };
 
-    const closeModal = () => {
-        setIsEditing(false);
-        setCurrentItem(null);
-        setFormData(initialFormState);
+    const handleDelete = async (id) => {
+        if (!confirm('Delete this menu item?')) return;
+        await supabase.from('menu_items').delete().eq('id', id);
+        fetchItems();
     };
 
-    const categories = ['Starters', 'Mains', 'Desserts', 'Drinks'];
+    const filtered = filterCat === 'All' ? items : items.filter(i => i.category === filterCat);
 
     return (
         <div>
-            <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold">Menu Management</h1>
-                <button
-                    onClick={() => setIsEditing(true)}
-                    className="bg-accent text-black px-4 py-2 rounded flex items-center gap-2 font-bold"
-                >
-                    <Plus size={20} /> Add Item
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                <div>
+                    <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#fff' }}>Menu Editor</h1>
+                    <p style={{ color: '#666', fontSize: '0.875rem', marginTop: '0.2rem' }}>{items.length} items total</p>
+                </div>
+                <button onClick={openAdd} style={{
+                    display: 'flex', alignItems: 'center', gap: '0.5rem',
+                    background: 'var(--color-accent, #e8b86d)', color: '#000',
+                    fontWeight: '700', padding: '0.65rem 1.25rem', borderRadius: '8px',
+                    border: 'none', cursor: 'pointer', fontSize: '0.9rem',
+                }}>
+                    <Plus size={18} /> Add Item
                 </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {menuItems.map(item => (
-                    <div key={item.id} className="bg-gray-800 rounded-lg overflow-hidden flex flex-col">
-                        <div className="h-48 relative">
-                            <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                            <div className="absolute top-2 right-2 flex gap-2">
-                                <button
-                                    onClick={() => handleEdit(item)}
-                                    className="p-2 bg-blue-600 rounded-full text-white hover:bg-blue-700"
-                                >
-                                    <Edit size={16} />
-                                </button>
-                                <button
-                                    onClick={() => handleDelete(item.id)}
-                                    className="p-2 bg-red-600 rounded-full text-white hover:bg-red-700"
-                                >
-                                    <Trash size={16} />
-                                </button>
-                            </div>
-                        </div>
-                        <div className="p-4 flex-1">
-                            <div className="flex justify-between items-start mb-2">
-                                <h3 className="font-bold text-lg">{item.name}</h3>
-                                <span className="text-accent font-mono">${item.price}</span>
-                            </div>
-                            <span className="text-xs bg-gray-700 px-2 py-1 rounded mb-2 inline-block text-gray-300">
-                                {item.category}
-                            </span>
-                            <p className="text-gray-400 text-sm mt-2">{item.description}</p>
-                        </div>
-                    </div>
+            {/* Category filter */}
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
+                {['All', ...CATEGORIES].map(cat => (
+                    <button key={cat} onClick={() => setFilterCat(cat)} style={{
+                        padding: '0.4rem 0.9rem', borderRadius: '999px', border: 'none',
+                        background: filterCat === cat ? 'var(--color-accent, #e8b86d)' : 'rgba(255,255,255,0.07)',
+                        color: filterCat === cat ? '#000' : '#aaa',
+                        fontWeight: filterCat === cat ? '600' : '400',
+                        cursor: 'pointer', fontSize: '0.8rem',
+                    }}>
+                        {cat}
+                    </button>
                 ))}
             </div>
 
-            {/* Modal */}
-            {isEditing && (
-                <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
-                    <div className="bg-gray-800 p-6 rounded-lg w-full max-w-md relative">
-                        <button
-                            onClick={closeModal}
-                            className="absolute top-4 right-4 text-gray-400 hover:text-white"
-                        >
-                            <X />
-                        </button>
-
-                        <h2 className="text-2xl font-bold mb-6">
-                            {currentItem ? 'Edit Item' : 'Add New Item'}
-                        </h2>
-
-                        <form onSubmit={handleSubmit} className="space-y-4">
-                            <div>
-                                <label className="block text-sm text-gray-400 mb-1">Name</label>
-                                <input
-                                    type="text"
-                                    value={formData.name}
-                                    onChange={e => setFormData({ ...formData, name: e.target.value })}
-                                    className="w-full bg-gray-700 border-gray-600 rounded p-2 text-white"
-                                    required
-                                />
+            {/* Items grid */}
+            {loading ? (
+                <div style={{ textAlign: 'center', color: '#555', padding: '3rem' }}>Loading…</div>
+            ) : filtered.length === 0 ? (
+                <div style={{ textAlign: 'center', color: '#555', padding: '3rem' }}>No items found.</div>
+            ) : (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
+                    {filtered.map(item => (
+                        <div key={item.id} style={{
+                            background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.07)',
+                            borderRadius: '12px', overflow: 'hidden',
+                        }}>
+                            {item.image_url ? (
+                                <img src={item.image_url} alt={item.name} style={{ width: '100%', height: '160px', objectFit: 'cover' }} />
+                            ) : (
+                                <div style={{ width: '100%', height: '160px', background: '#222', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#444' }}>
+                                    <ImagePlus size={32} />
+                                </div>
+                            )}
+                            <div style={{ padding: '1rem' }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.4rem' }}>
+                                    <h3 style={{ color: '#fff', fontWeight: '600', fontSize: '0.95rem' }}>{item.name}</h3>
+                                    <span style={{ color: 'var(--color-accent, #e8b86d)', fontWeight: '700', fontSize: '0.95rem', whiteSpace: 'nowrap', marginLeft: '0.5rem' }}>
+                                        £{parseFloat(item.price).toFixed(2)}
+                                    </span>
+                                </div>
+                                <p style={{ color: '#666', fontSize: '0.8rem', marginBottom: '0.75rem', lineHeight: '1.4' }}>{item.description}</p>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <span style={{
+                                        fontSize: '0.75rem', padding: '0.2rem 0.6rem', borderRadius: '999px',
+                                        background: 'rgba(255,255,255,0.07)', color: '#aaa',
+                                    }}>{item.category}</span>
+                                    <div style={{ display: 'flex', gap: '0.5rem' }}>
+                                        <button onClick={() => openEdit(item)} style={{ background: 'rgba(255,255,255,0.07)', border: 'none', borderRadius: '6px', padding: '0.4rem', color: '#aaa', cursor: 'pointer' }}>
+                                            <Pencil size={14} />
+                                        </button>
+                                        <button onClick={() => handleDelete(item.id)} style={{ background: 'rgba(239,68,68,0.1)', border: 'none', borderRadius: '6px', padding: '0.4rem', color: '#f87171', cursor: 'pointer' }}>
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
+                        </div>
+                    ))}
+                </div>
+            )}
 
-                            <div className="grid grid-cols-2 gap-4">
+            {/* Modal Form */}
+            {showForm && (
+                <div style={{
+                    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    zIndex: 1000, padding: '1rem',
+                }}>
+                    <div style={{
+                        background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)',
+                        borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '520px',
+                        maxHeight: '90vh', overflowY: 'auto',
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <h2 style={{ color: '#fff', fontWeight: '700', fontSize: '1.1rem' }}>
+                                {editId ? 'Edit Item' : 'Add Menu Item'}
+                            </h2>
+                            <button onClick={closeForm} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer' }}>
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        {error && <div style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px', padding: '0.75rem', color: '#f87171', fontSize: '0.85rem', marginBottom: '1rem' }}>{error}</div>}
+
+                        <form onSubmit={handleSave} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                            <div>
+                                <label style={{ display: 'block', color: '#aaa', fontSize: '0.8rem', marginBottom: '0.35rem' }}>Name *</label>
+                                <input style={inputStyle} value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))} required />
+                            </div>
+                            <div>
+                                <label style={{ display: 'block', color: '#aaa', fontSize: '0.8rem', marginBottom: '0.35rem' }}>Description</label>
+                                <textarea style={{ ...inputStyle, minHeight: '80px', resize: 'vertical' }} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
                                 <div>
-                                    <label className="block text-sm text-gray-400 mb-1">Category</label>
-                                    <select
-                                        value={formData.category}
-                                        onChange={e => setFormData({ ...formData, category: e.target.value })}
-                                        className="w-full bg-gray-700 border-gray-600 rounded p-2 text-white"
-                                    >
-                                        {categories.map(c => <option key={c} value={c}>{c}</option>)}
+                                    <label style={{ display: 'block', color: '#aaa', fontSize: '0.8rem', marginBottom: '0.35rem' }}>Price (£) *</label>
+                                    <input style={inputStyle} type="number" step="0.01" min="0" value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))} required />
+                                </div>
+                                <div>
+                                    <label style={{ display: 'block', color: '#aaa', fontSize: '0.8rem', marginBottom: '0.35rem' }}>Category *</label>
+                                    <select style={{ ...inputStyle }} value={form.category} onChange={e => setForm(f => ({ ...f, category: e.target.value }))}>
+                                        {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
                                     </select>
                                 </div>
-                                <div>
-                                    <label className="block text-sm text-gray-400 mb-1">Price</label>
-                                    <input
-                                        type="number"
-                                        value={formData.price}
-                                        onChange={e => setFormData({ ...formData, price: e.target.value })}
-                                        className="w-full bg-gray-700 border-gray-600 rounded p-2 text-white"
-                                        required
-                                    />
-                                </div>
                             </div>
-
                             <div>
-                                <label className="block text-sm text-gray-400 mb-1">Image URL</label>
-                                <input
-                                    type="text"
-                                    value={formData.image}
-                                    onChange={e => setFormData({ ...formData, image: e.target.value })}
-                                    className="w-full bg-gray-700 border-gray-600 rounded p-2 text-white"
-                                    placeholder="https://..."
-                                />
+                                <label style={{ display: 'block', color: '#aaa', fontSize: '0.8rem', marginBottom: '0.35rem' }}>Image</label>
+                                {form.image_url && <img src={form.image_url} alt="" style={{ width: '100%', height: '140px', objectFit: 'cover', borderRadius: '8px', marginBottom: '0.5rem' }} />}
+                                <label style={{
+                                    display: 'flex', alignItems: 'center', gap: '0.5rem',
+                                    padding: '0.65rem', borderRadius: '8px',
+                                    border: '1px dashed rgba(255,255,255,0.2)',
+                                    color: '#aaa', cursor: 'pointer', fontSize: '0.85rem',
+                                }}>
+                                    {uploading ? <><Loader size={16} className="spin" /> Uploading…</> : <><ImagePlus size={16} /> Upload Image</>}
+                                    <input type="file" accept="image/*" style={{ display: 'none' }} onChange={handleImageUpload} disabled={uploading} />
+                                </label>
                             </div>
-
-                            <div>
-                                <label className="block text-sm text-gray-400 mb-1">Description</label>
-                                <textarea
-                                    value={formData.description}
-                                    onChange={e => setFormData({ ...formData, description: e.target.value })}
-                                    className="w-full bg-gray-700 border-gray-600 rounded p-2 text-white"
-                                    rows="3"
-                                ></textarea>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                                <input type="checkbox" id="available" checked={form.is_available} onChange={e => setForm(f => ({ ...f, is_available: e.target.checked }))} />
+                                <label htmlFor="available" style={{ color: '#aaa', fontSize: '0.875rem' }}>Available on menu</label>
                             </div>
-
-                            <div className="flex items-center gap-2">
-                                <input
-                                    type="checkbox"
-                                    checked={formData.available}
-                                    onChange={e => setFormData({ ...formData, available: e.target.checked })}
-                                    id="available"
-                                />
-                                <label htmlFor="available" className="text-sm text-gray-300">Available</label>
+                            <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
+                                <button type="button" onClick={closeForm} style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.12)', background: 'none', color: '#aaa', cursor: 'pointer' }}>Cancel</button>
+                                <button type="submit" disabled={saving || uploading} style={{
+                                    flex: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
+                                    padding: '0.75rem', borderRadius: '8px', border: 'none',
+                                    background: 'var(--color-accent, #e8b86d)', color: '#000',
+                                    fontWeight: '700', cursor: saving ? 'not-allowed' : 'pointer', opacity: saving ? 0.7 : 1,
+                                }}>
+                                    <Save size={16} /> {saving ? 'Saving…' : 'Save Item'}
+                                </button>
                             </div>
-
-                            <button type="submit" className="w-full bg-accent text-black font-bold py-2 rounded mt-4">
-                                Save Item
-                            </button>
                         </form>
                     </div>
                 </div>

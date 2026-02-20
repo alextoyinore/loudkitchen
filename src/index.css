@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Fraunces:opsz,wght@9..144,400;700;900&family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Fraunces:opsz,wght@9..144,400;700;900&family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 :root {
     --bg-primary: #0a0a0a;
@@ -11,8 +11,8 @@
     --accent-hover: #b5952f;
     --danger: #cf6679;
     --success: #03dac6;
-    --font-heading: 'Fraunces', serif;
-    /* Placeholder for premium serif */
+    --font-heading: 'Plus Jakarta Sans', sans-serif;
+    /* Clean, modern, high-contrast sans */
     --font-body: 'Inter', sans-serif;
     --spacing-sm: 0.5rem;
     --spacing-md: 1.5rem;
@@ -25,13 +25,13 @@
 
 @media (min-width: 768px) {
     :root {
-        --page-margin: 2rem;
+        --page-margin: 0rem;
     }
 }
 
 @media (min-width: 1024px) {
     :root {
-        --page-margin: 3rem;
+        --page-margin: 0rem;
     }
 }
 

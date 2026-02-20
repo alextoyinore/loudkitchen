@@ -17,7 +17,7 @@ const Blog = () => {
                         <Link to={`/blog/${post.id}`} key={post.id} className="bg-secondary rounded-lg overflow-hidden flex flex-col h-full border border-gray-800 hover:border-accent transition-colors duration-300 group">
                             <div className="h-64 overflow-hidden relative">
                                 <img
-                                    src={post.image}
+                                    src={post.cover_image}
                                     alt={post.title}
                                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                 />
@@ -25,7 +25,7 @@ const Blog = () => {
                             </div>
                             <div className="p-8 flex flex-col flex-1">
                                 <div className="text-xs text-accent mb-3 uppercase tracking-widest font-bold">
-                                    {post.date} &bull; {post.author}
+                                    {post.created_at ? new Date(post.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : ''} &bull; {post.author}
                                 </div>
                                 <h2 className="text-2xl mb-4 font-heading uppercase leading-tight group-hover:text-accent transition-colors">{post.title}</h2>
                                 <p className="text-gray-400 text-sm mb-6 line-clamp-3 flex-1 leading-relaxed">

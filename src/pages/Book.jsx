@@ -13,17 +13,28 @@ const Book = () => {
         requests: ''
     });
     const [submitted, setSubmitted] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        addBooking(formData);
-        setSubmitted(true);
-        // Reset form after a delay or keep it submitted state
+        setLoading(true);
+        setError(null);
+        try {
+            const { error: submitError } = await addBooking({ ...formData, notes: formData.requests });
+            if (submitError) throw submitError;
+            setSubmitted(true);
+        } catch (err) {
+            console.error('Booking error:', err);
+            setError('Failed to book table. Please try again.');
+        } finally {
+            setLoading(false);
+        }
     };
 
     if (submitted) {
@@ -157,6 +168,11 @@ const Book = () => {
                             </div>
                         </div>
 
+                        {error && (
+                            <div className="bg-red-500/10 border border-red-500/20 text-red-500 p-3 rounded mb-4 text-sm">
+                                {error}
+                            </div>
+                        )}
                         <div>
                             <label className="block text-sm mb-1 text-gray-400">Special Requests</label>
                             <textarea
@@ -168,7 +184,20 @@ const Book = () => {
                             ></textarea>
                         </div>
 
-                        <button type="submit" className="btn btn-primary w-full mt-4">Confirm Reservation</button>
+                        <button
+                            type="submit"
+                            className="btn btn-primary w-full mt-4 flex items-center justify-center gap-2"
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <>
+                                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                                    Processing...
+                                </>
+                            ) : (
+                                'Confirm Reservation'
+                            )}
+                        </button>
                     </form>
                 </div>
             </div>

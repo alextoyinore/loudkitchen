@@ -8,8 +8,7 @@ const DishDetail = () => {
     const navigate = useNavigate();
     const { menuItems } = useData();
 
-    // Convert id to number since params are strings
-    const dish = menuItems.find(item => item.id === parseInt(id));
+    const dish = menuItems.find(item => String(item.id) === id);
 
     if (!dish) {
         return (
@@ -38,7 +37,7 @@ const DishDetail = () => {
                     {/* Left Column: Image */}
                     <div className="rounded-2xl overflow-hidden shadow-2xl border border-gray-800 relative bg-secondary h-72 md:h-96 lg:h-[500px]">
                         <img
-                            src={dish.image}
+                            src={dish.image_url}
                             alt={dish.name}
                             className="w-full h-full object-cover"
                         />
@@ -60,7 +59,7 @@ const DishDetail = () => {
                                     <span>20 Mins Preparation</span>
                                 </div>
                                 <div className="flex items-center gap-4">
-                                    {dish.available ? (
+                                    {dish.is_available ? (
                                         <>
                                             <CheckCircle size={18} className="text-green-500" />
                                             <span>In Stock</span>

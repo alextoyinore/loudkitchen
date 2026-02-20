@@ -18,9 +18,9 @@ const Footer = () => {
                         Where taste meets sound.
                     </p>
                     <div className="socials flex gap-4">
-                        <a href={siteSettings.socials.facebook} target="_blank" rel="noreferrer"><Facebook size={20} /></a>
-                        <a href={siteSettings.socials.instagram} target="_blank" rel="noreferrer"><Instagram size={20} /></a>
-                        <a href={siteSettings.socials.twitter} target="_blank" rel="noreferrer"><Twitter size={20} /></a>
+                        {siteSettings?.facebook && <a href={siteSettings.facebook} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-accent transition-colors"><Facebook size={20} /></a>}
+                        {siteSettings?.instagram && <a href={siteSettings.instagram} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-accent transition-colors"><Instagram size={20} /></a>}
+                        {siteSettings?.twitter && <a href={siteSettings.twitter} target="_blank" rel="noreferrer" className="text-gray-400 hover:text-accent transition-colors"><Twitter size={20} /></a>}
                     </div>
                 </div>
 
@@ -37,18 +37,20 @@ const Footer = () => {
 
                 {/* Contact */}
                 <div className="footer-col">
-                    <h4>Contact Us</h4>
-                    <div className="flex items-center gap-2 mb-2" style={{ color: 'var(--text-secondary)' }}>
-                        <MapPin size={18} className="text-accent" />
-                        <span>{siteSettings.address}</span>
-                    </div>
-                    <div className="flex items-center gap-2 mb-2" style={{ color: 'var(--text-secondary)' }}>
-                        <Phone size={18} className="text-accent" />
-                        <span>{siteSettings.phone}</span>
-                    </div>
-                    <div className="flex items-center gap-2 mb-2" style={{ color: 'var(--text-secondary)' }}>
-                        <Mail size={18} className="text-accent" />
-                        <span>{siteSettings.contactEmail}</span>
+                    <h4 style={{ color: '#fff', fontSize: '1.1rem', marginBottom: '1.5rem', fontWeight: '600' }}>Contact Us</h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                        <div className="flex items-start gap-3" style={{ color: 'var(--text-secondary)' }}>
+                            <MapPin size={18} className="text-accent" style={{ marginTop: '3px', flexShrink: 0 }} />
+                            <span style={{ fontSize: '0.95rem', lineHeight: '1.5' }}>{siteSettings?.address || 'Loading...'}</span>
+                        </div>
+                        <div className="flex items-center gap-3" style={{ color: 'var(--text-secondary)' }}>
+                            <Phone size={18} className="text-accent" style={{ flexShrink: 0 }} />
+                            <span style={{ fontSize: '0.95rem' }}>{siteSettings?.phone || ''}</span>
+                        </div>
+                        <div className="flex items-center gap-3" style={{ color: 'var(--text-secondary)' }}>
+                            <Mail size={18} className="text-accent" style={{ flexShrink: 0 }} />
+                            <span style={{ fontSize: '0.95rem' }}>{siteSettings?.contact_email || ''}</span>
+                        </div>
                     </div>
                 </div>
 
