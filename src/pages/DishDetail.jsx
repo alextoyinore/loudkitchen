@@ -99,7 +99,7 @@ const DishDetail = () => {
                                 <button
                                     onClick={handleAddToCart}
                                     disabled={!dish.is_available}
-                                    className={`flex-[2] py-4 font-bold tracking-wider flex items-center justify-center gap-3 rounded-xl transition-all duration-300 text-sm uppercase
+                                    className={`flex-[2] py-4 font-bold tracking-wider flex items-center justify-center gap-3 transition-all duration-300 text-sm uppercase
                                         ${added
                                             ? 'bg-green-500 text-white scale-[0.98] shadow-[0_0_20px_rgba(34,197,94,0.3)]'
                                             : 'btn btn-primary hover:scale-[1.02] active:scale-[0.97]'

@@ -61,30 +61,30 @@ const Cart = () => {
                     </div>
                 </header>
 
-                <div className="flex lg:flex-row gap-10 lg:gap-16">
+                <div className="flex flex-col lg:flex-row gap-10 lg:gap-16">
 
                     {/* Left: Item Cards */}
                     <div className="flex flex-col gap-10 min-w-0 divide-y divide-gray-800/60">
                         {cart.map((item, index) => (
                             <div
                                 key={item.id}
-                                className={`group py-6 flex sm:flex-row gap-6 transition-all duration-500 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+                                className={`group py-6 flex sm:flex-col gap-6 transition-all duration-500 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
                                 style={{ transitionDelay: `${index * 60}ms` }}
                             >
                                 {/* Thumbnail */}
                                 <Link
                                     to={`/menu/${item.id}`}
-                                    className="relative w-28 h-28 flex-shrink-0 bg-secondary rounded-xl overflow-hidden border border-gray-800 group-hover:border-accent/30 transition-colors block"
+                                    className="relative h-32 w-32 flex-0 hidden md:block flex-shrink-0 overflow-hidden bg-secondary rounded-lg overflow-hidden border border-gray-800 group-hover:border-accent/30 transition-colors block"
                                 >
                                     <img
                                         src={item.image_url || 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80'}
                                         alt={item.name}
-                                        className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-all duration-500"
+                                        className="w-full h-full aspect-square object-cover group-hover:scale-105 transition-all duration-500"
                                     />
                                 </Link>
 
                                 {/* Content */}
-                                <div className="flex flex-col justify-start">
+                                <div className="flex flex-col flex-1 justify-start">
                                     <div className="flex justify-between items-start gap-6">
                                         <div className="flex-1 min-w-0">
                                             <Link
