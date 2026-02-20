@@ -90,21 +90,50 @@ const Home = () => {
                         </Link>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                        {featuredItems.map((item) => (
-                            <Link to={`/menu/${item.id}`} key={item.id} className="menu-card bg-secondary p-4 rounded-lg hover:transform hover:-translate-y-2 transition-transform duration-300 block">
-                                <div className="relative h-64 mb-4 overflow-hidden rounded">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+                        {featuredItems.map(item => (
+                            <Link
+                                to={`/menu/${item.id}`}
+                                key={item.id}
+                                className="bg-secondary rounded-xl overflow-hidden group hover:-translate-y-2 transition-all duration-300 block border border-transparent hover:border-gray-800"
+                            >
+                                {/* Image Container */}
+                                <div className="relative h-64 overflow-hidden">
                                     <img
                                         src={item.image_url}
                                         alt={item.name}
-                                        className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                                     />
-                                    <div className="absolute top-2 right-2 bg-black/70 px-3 py-1 rounded text-accent font-bold text-lg">
-                                        ₦{item.price}
+                                    {/* Price Overlay */}
+                                    <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 shadow-lg">
+                                        <span className="text-accent font-bold text-lg">₦{item.price}</span>
                                     </div>
                                 </div>
-                                <h3 className="text-3xl mb-2 uppercase tracking-wide">{item.name}</h3>
-                                <p className="text-gray-400 mb-6 text-base">{item.description}</p>
+
+                                {/* Content Container */}
+                                <div className="p-6">
+                                    <div className="mb-4">
+                                        <h3 className="text-2xl font-heading uppercase tracking-wide mb-2 group-hover:text-accent transition-colors">
+                                            {item.name}
+                                        </h3>
+                                        <p className="text-gray-400 text-sm line-clamp-3 leading-relaxed">
+                                            {item.description}
+                                        </p>
+                                    </div>
+
+                                    <div className="flex justify-between items-center pt-4">
+                                        <span className={`text-xs px-2.5 py-1 rounded-full ${item.is_available
+                                            ? 'text-green-400 bg-green-500/10'
+                                            : 'text-red-400 bg-red-500/10'
+                                            }`}>
+                                            {item.is_available ? 'In Stock' : 'Sold Out'}
+                                        </span>
+
+                                        <span className="text-accent text-sm font-medium flex items-center gap-1 group-hover:translate-x-1 transition-transform">
+                                            Details <ArrowRight size={14} />
+                                        </span>
+                                    </div>
+                                </div>
                             </Link>
                         ))}
                     </div>

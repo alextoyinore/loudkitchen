@@ -3,7 +3,7 @@ import { supabase } from '../../lib/supabase';
 import { uploadToCloudinary } from '../../lib/cloudinary';
 import { Plus, Pencil, Trash2, X, Save, ImagePlus, Loader } from 'lucide-react';
 
-const CATEGORIES = ['Starters', 'Mains', 'Desserts', 'Drinks', 'Specials'];
+const CATEGORIES = ['Starters', 'Mains', 'Sides', 'Pasta', 'Combo', 'Sandwich', 'Grill', 'Desserts', 'Drinks', 'Specials'];
 
 const emptyForm = { name: '', description: '', price: '', category: 'Mains', image_url: '', is_available: true };
 
