@@ -3,19 +3,15 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-    const [cart, setCart] = useState([]);
-
-    // Load cart from localStorage on mount
-    useEffect(() => {
-        const savedCart = localStorage.getItem('loudkitchen_cart');
-        if (savedCart) {
-            try {
-                setCart(JSON.parse(savedCart));
-            } catch (e) {
-                console.error("Failed to parse cart", e);
-            }
+    const [cart, setCart] = useState(() => {
+        try {
+            const savedCart = localStorage.getItem('loudkitchen_cart');
+            return savedCart ? JSON.parse(savedCart) : [];
+        } catch (e) {
+            console.error("Failed to parse cart", e);
+            return [];
         }
-    }, []);
+    });
 
     // Save cart to localStorage whenever it changes
     useEffect(() => {
