@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ShoppingBag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import logoLight from '../assets/logo_light.png';
+import logo from '../assets/logo.png';
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -52,7 +52,7 @@ const Navbar = () => {
         }}>
             <div className="container navbar-inner">
                 <Link to="/" className="logo">
-                    <img src={logoLight} alt="LoudKitchen" style={{ height: '40px', width: 'auto', display: 'block' }} />
+                    <img src={logo} alt="LoudKitchen" style={{ height: '40px', width: 'auto', display: 'block' }} />
                 </Link>
 
                 {/* Desktop Menu */}
