@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ShoppingBag } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import logo from '../assets/logo.png';
+import logo from '../assets/logo_light.png';
 
 const Navbar = () => {
     const [isOpen, setIsOpen] = useState(false);
@@ -33,8 +33,6 @@ const Navbar = () => {
     const navLinks = [
         { name: 'Home', path: '/' },
         { name: 'Menu', path: '/menu' },
-        { name: 'Book a Table', path: '/book' },
-        { name: 'Gallery', path: '/gallery' },
         { name: 'Reviews', path: '/reviews' },
         { name: 'Blog', path: '/blog' },
         { name: 'About', path: '/about' },
@@ -52,7 +50,7 @@ const Navbar = () => {
         }}>
             <div className="container navbar-inner">
                 <Link to="/" className="logo">
-                    <img src={logo} alt="LoudKitchen" style={{ height: '40px', width: 'auto', display: 'block' }} />
+                    <img src={logo} alt="LoudKitchen" style={{ height: '60px', width: 'auto', display: 'block' }} />
                 </Link>
 
                 {/* Desktop Menu */}
@@ -104,23 +102,25 @@ const Navbar = () => {
                     <X size={32} />
                 </button>
                 <div className="mobile-menu-inner">
-                    {navLinks.map((link) => (
+                    {navLinks.map((item) => (
                         <Link
-                            key={link.name}
-                            to={link.path}
-                            className={`mobile-nav-link ${isActive(link.path) ? 'active' : ''}`}
+                            key={item.path}
+                            to={item.path}
+                            className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all duration-300 ${location.pathname === item.path
+                                ? 'bg-accent text-black'
+                                : 'text-gray-400 hover:text-white hover:bg-white/5'
+                                }`}
                             onClick={() => setIsOpen(false)}
                         >
-                            {link.name}
+                            {item.name}
                         </Link>
                     ))}
-                    <Link to="/book" className="btn btn-primary mt-8" onClick={() => setIsOpen(false)}>
-                        Book Now
-                    </Link>
+
                 </div>
             </div>
         </nav>
     );
 };
+
 
 export default Navbar;

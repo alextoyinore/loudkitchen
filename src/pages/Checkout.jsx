@@ -1,14 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { supabase } from '../lib/supabase';
-import { CheckCircle2, ChevronLeft, CreditCard, Loader2, Truck, Timer, ShieldCheck } from 'lucide-react';
+import {
+    CheckCircle2,
+    ChevronLeft,
+    Loader2,
+    Timer,
+    ShieldCheck,
+    ShoppingBag,
+    ArrowRight,
+    Utensils,
+    Info,
+    Check
+} from 'lucide-react';
 
 const Checkout = () => {
     const { cart, cartTotal, clearCart } = useCart();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [orderComplete, setOrderComplete] = useState(false);
+    const [isLoaded, setIsLoaded] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -16,10 +28,12 @@ const Checkout = () => {
         notes: ''
     });
 
-    if (cart.length === 0 && !orderComplete) {
-        navigate('/cart');
-        return null;
-    }
+    useEffect(() => {
+        setIsLoaded(true);
+        if (cart.length === 0 && !orderComplete) {
+            navigate('/cart');
+        }
+    }, [cart.length, navigate, orderComplete]);
 
     const handleChange = (e) => {
         setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -30,7 +44,6 @@ const Checkout = () => {
         setLoading(true);
 
         try {
-            // 1. Create Order
             const { data: order, error: orderError } = await supabase
                 .from('orders')
                 .insert([{
@@ -46,7 +59,6 @@ const Checkout = () => {
 
             if (orderError) throw orderError;
 
-            // 2. Create Order Items
             const orderItems = cart.map(item => ({
                 order_id: order.id,
                 item_id: item.id,
@@ -62,12 +74,11 @@ const Checkout = () => {
 
             if (itemsError) throw itemsError;
 
-            // 3. Complete
             setOrderComplete(true);
             clearCart();
         } catch (error) {
             console.error("Order failed", error);
-            alert("Sorry, something went wrong with your order. Please try again.");
+            alert("Order failed. Please check your connection and try again.");
         } finally {
             setLoading(false);
         }
@@ -75,25 +86,29 @@ const Checkout = () => {
 
     if (orderComplete) {
         return (
-            <div className="min-h-screen bg-primary flex flex-col items-center justify-center text-white px-4 relative overflow-hidden">
-                <div className="absolute top-0 left-0 w-full h-full opacity-5 pointer-events-none">
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-accent rounded-full blur-[180px]"></div>
-                </div>
+            <div className="min-h-screen bg-[#080808] flex flex-col items-center justify-center text-white px-4 relative overflow-hidden font-outfit">
+                {/* Ambient Background */}
+                <div className="fixed top-0 right-0 w-[50vw] h-[50vw] bg-accent/3 blur-[160px] pointer-events-none rounded-full"></div>
+                <div className="fixed -bottom-20 -left-20 w-[40vw] h-[40vw] bg-white/5 blur-[140px] pointer-events-none rounded-full"></div>
 
-                <div className="relative z-10 flex flex-col items-center">
-                    <div className="bg-green-500/10 p-20 rounded-full mb-10 border border-green-500/20 shadow-2xl shadow-green-500/10">
-                        <CheckCircle2 size={80} className="text-green-500" />
+                <div className={`relative z-10 flex flex-col items-center max-w-xl text-center transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+                    <div className="w-24 h-24 bg-success p-6 rounded-[32px] md:rounded-[40px] mb-10 shadow-[0_0_50px_rgba(34,197,94,0.3)] flex items-center justify-center text-black">
+                        <Check size={48} />
                     </div>
-                    <h2 className="text-5xl font-bold mb-6 tracking-tight">Order Received!</h2>
-                    <p className="text-gray-400 mb-12 max-w-xl text-center text-xl leading-relaxed">
-                        Thank you for choosing <span className="text-white font-bold">LoudKitchen</span>. Our chefs are already getting to work! We'll contact you at <span className="text-accent font-bold">{formData.phone}</span> once your meal is ready.
+
+                    <h2 className="text-4xl md:text-7xl font-black mb-6 uppercase tracking-tighter italic leading-none">
+                        ORDER <span className="text-accent">SECURED</span>
+                    </h2>
+                    <p className="text-gray-500 text-base md:text-lg leading-relaxed mb-12 font-medium italic">
+                        Your rhythm is now in our kitchen. We'll contact you at <span className="text-white font-bold">{formData.phone}</span> once the feast is ready.
                     </p>
-                    <div className="flex flex-col sm:flex-row gap-6 w-full max-w-md">
-                        <Link to="/menu" className="flex-1 btn btn-primary py-5 text-center font-bold text-lg hover:scale-105 transition-all">
-                            Back to Menu
+
+                    <div className="flex flex-col sm:flex-row gap-4 w-full">
+                        <Link to="/menu" className="flex-1 bg-accent text-black h-16 rounded-full flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-[0.2em] hover:scale-[1.02] transition-all shadow-xl">
+                            Explore More <ArrowRight size={16} />
                         </Link>
-                        <Link to="/" className="flex-1 btn btn-outline py-5 text-center font-bold text-lg hover:bg-white/5 transition-all">
-                            Return Home
+                        <Link to="/" className="flex-1 bg-white/5 text-white h-16 rounded-full flex items-center justify-center text-[10px] font-black uppercase tracking-[0.2em] border border-white/10 hover:bg-white/10 transition-all">
+                            Back to Studio
                         </Link>
                     </div>
                 </div>
@@ -102,176 +117,189 @@ const Checkout = () => {
     }
 
     return (
-        <div className="checkout-page bg-primary min-h-screen pt-32 pb-24 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-accent/5 blur-[150px] pointer-events-none"></div>
+        <div className="checkout-page bg-[#080808] min-h-screen pb-40 relative overflow-hidden font-outfit text-white">
+            {/* Header Section with Background */}
+            <div className="relative pt-28 pb-32 mb-16 md:mb-24 overflow-hidden">
+                {/* Background Image with Dark Overlay */}
+                <div className="absolute inset-0 z-0">
+                    <img
+                        src="https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&q=80&w=2000"
+                        alt="Checkout Background"
+                        className="w-full h-full object-cover grayscale-[0.8] brightness-[0.2]"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-b from-[#080808] via-transparent to-[#080808]"></div>
+                </div>
 
-            <div className="container max-w-6xl relative z-10">
-                <button
-                    onClick={() => navigate('/cart')}
-                    className="flex items-center gap-2 text-gray-500 hover:text-accent mb-12 transition-colors group"
-                >
-                    <ChevronLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
-                    <span className="font-medium">Return to Cart</span>
-                </button>
+                <div className="container max-w-7xl px-4 mx-auto relative z-10 text-center">
+                    <button
+                        onClick={() => navigate('/cart')}
+                        className="inline-flex items-center gap-2 text-gray-500 hover:text-white mb-10 transition-colors group text-[10px] font-black uppercase tracking-[0.3em]"
+                    >
+                        <ChevronLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+                        Modify Feast
+                    </button>
+                    <div className="w-12 h-1 bg-accent mx-auto mb-8"></div>
+                    <h1 className="text-5xl md:text-8xl font-black uppercase italic leading-[0.9] tracking-tighter mb-8 text-white">
+                        FINAL <br />
+                        <span className="text-accent italic">VALSES</span>
+                    </h1>
+                    <p className="max-w-md mx-auto text-gray-400 font-medium italic text-lg leading-relaxed">
+                        Complete your selection and let the kitchen begin its work.
+                    </p>
+                </div>
+            </div>
 
-                <h1 className="text-5xl md:text-6xl font-heading font-bold mb-16">Finalize Your <span className="text-accent">Order</span></h1>
+            {/* Ambient Background */}
+            <div className="fixed top-0 right-0 w-[50vw] h-[50vw] bg-accent/3 blur-[160px] pointer-events-none rounded-full"></div>
+            <div className="fixed -bottom-20 -left-20 w-[40vw] h-[40vw] bg-white/5 blur-[140px] pointer-events-none rounded-full"></div>
 
-                <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-16">
-                    {/* User Info */}
+            <div className={`container max-w-7xl px-4 mx-auto relative z-10 transition-all duration-1000 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}>
+                <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-start">
+                    {/* Left Column: Details */}
                     <div className="lg:col-span-7 space-y-12">
-                        <section>
-                            <div className="flex items-center gap-4 mb-8">
-                                <div className="w-10 h-10 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center text-accent font-bold">1</div>
-                                <h3 className="text-2xl font-bold text-white">Contact Information</h3>
+                        <div className="space-y-12">
+                            {/* Contact Info */}
+                            <div className="space-y-8">
+                                <div className="flex items-center gap-4 border-b border-white/5 pb-4">
+                                    <span className="text-[10px] font-black text-accent uppercase tracking-[0.3em]">01. Contact</span>
+                                </div>
+                                <div className="space-y-6">
+                                    <div className="group">
+                                        <p className="text-[9px] font-black text-gray-600 uppercase tracking-[0.2em] mb-3 ml-4">Full Name</p>
+                                        <input
+                                            type="text"
+                                            name="name"
+                                            required
+                                            value={formData.name}
+                                            onChange={handleChange}
+                                            placeholder="Michael Scott"
+                                            className="w-full bg-white/5 border border-white/5 rounded-full px-8 py-5 text-white focus:border-accent/40 focus:outline-none transition-all placeholder:text-gray-500 text-sm font-bold"
+                                        />
+                                    </div>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        <div className="group">
+                                            <p className="text-[9px] font-black text-gray-600 uppercase tracking-[0.2em] mb-3 ml-4">Email</p>
+                                            <input
+                                                type="email"
+                                                name="email"
+                                                required
+                                                value={formData.email}
+                                                onChange={handleChange}
+                                                placeholder="scott@dundermifflin.com"
+                                                className="w-full bg-white/5 border border-white/5 rounded-full px-8 py-5 text-white focus:border-accent/40 focus:outline-none transition-all placeholder:text-gray-500 text-sm font-bold"
+                                            />
+                                        </div>
+                                        <div className="group">
+                                            <p className="text-[9px] font-black text-gray-600 uppercase tracking-[0.2em] mb-3 ml-4">Phone</p>
+                                            <input
+                                                type="tel"
+                                                name="phone"
+                                                required
+                                                value={formData.phone}
+                                                onChange={handleChange}
+                                                placeholder="0800 000 0000"
+                                                className="w-full bg-white/5 border border-white/5 rounded-full px-8 py-5 text-white focus:border-accent/40 focus:outline-none transition-all placeholder:text-gray-500 text-sm font-bold"
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div className="space-y-6">
-                                <div>
-                                    <label className="block text-sm font-bold text-gray-500 uppercase tracking-widest mb-3">Full Name</label>
-                                    <input
-                                        type="text"
-                                        name="name"
-                                        required
-                                        value={formData.name}
+                            {/* Special Requests */}
+                            <div className="space-y-8">
+                                <div className="flex items-center gap-4 border-b border-white/5 pb-4">
+                                    <span className="text-[10px] font-black text-accent uppercase tracking-[0.3em]">02. Requests</span>
+                                </div>
+                                <div className="group">
+                                    <p className="text-[9px] font-black text-gray-600 uppercase tracking-[0.2em] mb-3 ml-4">Any dietary notes?</p>
+                                    <textarea
+                                        name="notes"
+                                        value={formData.notes}
                                         onChange={handleChange}
-                                        placeholder="John Doe"
-                                        className="w-full bg-secondary/40 backdrop-blur-md border border-white/5 rounded-2xl px-6 py-5 text-white focus:border-accent/40 focus:ring-1 focus:ring-accent/40 focus:outline-none transition-all placeholder:text-gray-600"
-                                    />
-                                </div>
-
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div>
-                                        <label className="block text-sm font-bold text-gray-500 uppercase tracking-widest mb-3">Email Address</label>
-                                        <input
-                                            type="email"
-                                            name="email"
-                                            required
-                                            value={formData.email}
-                                            onChange={handleChange}
-                                            placeholder="john@example.com"
-                                            className="w-full bg-secondary/40 backdrop-blur-md border border-white/5 rounded-2xl px-6 py-5 text-white focus:border-accent/40 focus:ring-1 focus:ring-accent/40 focus:outline-none transition-all placeholder:text-gray-600"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label className="block text-sm font-bold text-gray-500 uppercase tracking-widest mb-3">Phone Number</label>
-                                        <input
-                                            type="tel"
-                                            name="phone"
-                                            required
-                                            value={formData.phone}
-                                            onChange={handleChange}
-                                            placeholder="080 0000 0000"
-                                            className="w-full bg-secondary/40 backdrop-blur-md border border-white/5 rounded-2xl px-6 py-5 text-white focus:border-accent/40 focus:ring-1 focus:ring-accent/40 focus:outline-none transition-all placeholder:text-gray-600"
-                                        />
-                                    </div>
+                                        rows="4"
+                                        placeholder="Extra heat, no allergens, or a birthday shoutout..."
+                                        className="w-full bg-white/5 border border-white/5 rounded-[32px] px-8 py-6 text-white focus:border-accent/40 focus:outline-none transition-all resize-none placeholder:text-gray-500 text-sm font-bold italic"
+                                    ></textarea>
                                 </div>
                             </div>
-                        </section>
+                        </div>
 
-                        <section>
-                            <div className="flex items-center gap-4 mb-8">
-                                <div className="w-10 h-10 rounded-full bg-accent/10 border border-accent/20 flex items-center justify-center text-accent font-bold">2</div>
-                                <h3 className="text-2xl font-bold text-white">Preference & Notes</h3>
+                        {/* Badges */}
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                            <div className="bg-secondary/20 p-6 rounded-[32px] border border-white/5 text-center">
+                                <Timer className="text-accent mx-auto mb-3" size={24} />
+                                <p className="text-[10px] font-black uppercase tracking-widest text-white">~40 min</p>
                             </div>
-
-                            <div>
-                                <label className="block text-sm font-bold text-gray-500 uppercase tracking-widest mb-3">Special Instructions (Optional)</label>
-                                <textarea
-                                    name="notes"
-                                    value={formData.notes}
-                                    onChange={handleChange}
-                                    rows="4"
-                                    placeholder="Any allergies, spice level preferences, or delivery instructions?"
-                                    className="w-full bg-secondary/40 backdrop-blur-md border border-white/5 rounded-2xl px-6 py-5 text-white focus:border-accent/40 focus:ring-1 focus:ring-accent/40 focus:outline-none transition-all resize-none placeholder:text-gray-600"
-                                ></textarea>
+                            <div className="bg-secondary/20 p-6 rounded-[32px] border border-white/5 text-center">
+                                <ShoppingBag className="text-accent mx-auto mb-3" size={24} />
+                                <p className="text-[10px] font-black uppercase tracking-widest text-white">Live Status</p>
                             </div>
-                        </section>
-
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-8 border-t border-white/5">
-                            <div className="flex flex-col items-center text-center p-6 bg-secondary/20 rounded-3xl border border-white/5">
-                                <Timer className="text-accent mb-3" size={32} />
-                                <h4 className="text-white font-bold mb-1">Fast Prep</h4>
-                                <p className="text-xs text-gray-500">~25-40 min</p>
-                            </div>
-                            <div className="flex flex-col items-center text-center p-6 bg-secondary/20 rounded-3xl border border-white/5">
-                                <Truck className="text-accent mb-3" size={32} />
-                                <h4 className="text-white font-bold mb-1">Pickup/Delivery</h4>
-                                <p className="text-xs text-gray-500">Available Now</p>
-                            </div>
-                            <div className="flex flex-col items-center text-center p-6 bg-secondary/20 rounded-3xl border border-white/5">
-                                <ShieldCheck className="text-accent mb-3" size={32} />
-                                <h4 className="text-white font-bold mb-1">Secure</h4>
-                                <p className="text-xs text-gray-500">Safe Handling</p>
+                            <div className="hidden md:block bg-secondary/20 p-6 rounded-[32px] border border-white/5 text-center">
+                                <Utensils className="text-accent mx-auto mb-3" size={24} />
+                                <p className="text-[10px] font-black uppercase tracking-widest text-white">Freshly Orchestrated</p>
                             </div>
                         </div>
                     </div>
 
-                    {/* Payment & Summary */}
-                    <div className="lg:col-span-5">
-                        <div className="sticky top-32 space-y-8">
-                            <div className="bg-secondary p-10 rounded-[40px] border border-white/5 shadow-2xl relative overflow-hidden">
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-accent/10 blur-[60px]"></div>
-
-                                <h3 className="text-2xl font-bold text-white mb-8">Summary</h3>
-
-                                <div className="space-y-4 mb-8 max-h-64 overflow-y-auto pr-4 custom-scrollbar">
+                    {/* Right Column: Summary */}
+                    <div className="lg:col-span-5 h-fit lg:sticky lg:top-32">
+                        <div className="bg-secondary/30 backdrop-blur-xl border-2 border-white/5 rounded-[40px] p-8 md:p-10 shadow-2xl space-y-10">
+                            <div>
+                                <h3 className="text-xl font-black italic text-white mb-8 uppercase tracking-tight">Your Feast</h3>
+                                <div className="space-y-4 max-h-48 overflow-y-auto pr-4 custom-scrollbar">
                                     {cart.map(item => (
-                                        <div key={item.id} className="flex justify-between items-center group">
+                                        <div key={item.id} className="flex justify-between items-start">
                                             <div className="flex-1">
-                                                <p className="text-white font-medium group-hover:text-accent transition-colors">{item.name}</p>
-                                                <p className="text-xs text-gray-500 italic">Qty: {item.quantity}</p>
+                                                <p className="text-white font-bold text-sm uppercase">{item.name}</p>
+                                                <p className="text-[9px] text-gray-600 font-black uppercase tracking-widest mt-1">×{item.quantity}</p>
                                             </div>
-                                            <span className="text-accent/80 font-bold ml-4">₦{(item.price * item.quantity).toLocaleString()}</span>
+                                            <span className="text-white font-bold text-sm">₦{(item.price * item.quantity).toLocaleString()}</span>
                                         </div>
                                     ))}
                                 </div>
+                            </div>
 
-                                <div className="space-y-4 pt-8 border-t border-white/5">
-                                    <div className="flex justify-between text-gray-400">
-                                        <span>Order Subtotal</span>
-                                        <span>₦{cartTotal.toLocaleString()}</span>
-                                    </div>
-                                    <div className="flex justify-between text-gray-400">
-                                        <span>Estimated VAT</span>
-                                        <span>₦0.00</span>
-                                    </div>
-                                    <div className="flex justify-between items-end pt-4">
-                                        <span className="text-xl font-bold text-white">Grand Total</span>
-                                        <span className="text-3xl font-black text-accent">₦{cartTotal.toLocaleString()}</span>
-                                    </div>
+                            <div className="space-y-4 pt-8 border-t border-white/5">
+                                <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-gray-600">
+                                    <span>Subtotal</span>
+                                    <span className="text-white">₦{cartTotal.toLocaleString()}</span>
+                                </div>
+                                <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-gray-600">
+                                    <span>Service</span>
+                                    <span className="text-accent italic tracking-normal">Complimentary</span>
+                                </div>
+                                <div className="flex items-end justify-between pt-6">
+                                    <span className="text-xs font-black uppercase tracking-[0.2em] text-white">Total</span>
+                                    <span className="text-4xl font-black italic text-accent">₦{cartTotal.toLocaleString()}</span>
                                 </div>
                             </div>
 
-                            <div className="bg-accent p-10 rounded-[40px] shadow-2xl shadow-accent/20 relative group">
-                                <div className="absolute top-4 right-8 opacity-20 group-hover:opacity-40 transition-opacity">
-                                    <CreditCard size={120} />
+                            <div className="space-y-6">
+                                <div className="p-6 bg-white/5 rounded-[24px] border border-white/5">
+                                    <div className="flex items-center gap-2 mb-2">
+                                        <Info size={14} className="text-gray-500" />
+                                        <span className="text-[9px] font-black uppercase tracking-widest text-gray-500">Payment</span>
+                                    </div>
+                                    <p className="text-xs font-bold text-white mb-1">Pay on Arrival</p>
+                                    <p className="text-[10px] font-medium text-gray-600 italic leading-relaxed">Cash, Card, or Transfer at our station.</p>
                                 </div>
-
-                                <h3 className="text-2xl font-bold text-black mb-4 flex items-center gap-3">
-                                    Payment
-                                </h3>
-                                <p className="text-black/70 text-sm mb-10 leading-relaxed font-medium">
-                                    Currently we only support **Pay on Pick-up/Delivery** or Bank Transfer at the location.
-                                </p>
 
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="w-full bg-black text-white hover:bg-neutral-900 py-6 rounded-2xl flex items-center justify-center gap-4 text-xl font-black shadow-2xl transition-all hover:-translate-y-1 active:scale-95 disabled:opacity-70"
+                                    className="w-full bg-accent text-black h-20 rounded-full flex items-center justify-center gap-4 text-[10px] font-black uppercase tracking-[0.3em] shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50"
                                 >
                                     {loading ? (
                                         <>
-                                            <Loader2 className="animate-spin" size={24} />
-                                            Confirming Order...
+                                            <Loader2 className="animate-spin" size={20} />
+                                            Wait a moment
                                         </>
                                     ) : (
-                                        'Place Order Now'
+                                        <>
+                                            Secure My Feast <ArrowRight size={18} />
+                                        </>
                                     )}
                                 </button>
-
-                                <p className="text-black/40 text-[10px] text-center mt-6 font-bold uppercase tracking-widest">
-                                    Secure Ordering Process
-                                </p>
                             </div>
                         </div>
                     </div>

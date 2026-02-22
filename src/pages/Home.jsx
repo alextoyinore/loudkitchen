@@ -1,9 +1,10 @@
 ﻿import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useData } from '../context/DataContext';
-import { ArrowRight, Star, Quote } from 'lucide-react';
+import { ArrowRight, Star, Heart, Sparkles, Utensils } from 'lucide-react';
 import heroVideo from '../assets/hero_vid.mp4';
 import { supabase } from '../lib/supabase';
+import ReviewCard from '../components/ReviewCard';
 
 const FeaturedReviews = () => {
     const [reviews, setReviews] = useState([]);
@@ -40,34 +41,27 @@ const FeaturedReviews = () => {
     );
 
     return (
-        <section className="section bg-secondary overflow-hidden">
+        <section className="section bg-secondary overflow-hidden py-32 font-outfit">
             <div className="container">
-                <div className="text-center mb-16">
-                    <h2 className="text-4xl md:text-5xl mb-4">Guest <span className="text-accent">Testimonials</span></h2>
-                    <p className="text-gray-400">What people are saying about their LoudKitchen experience.</p>
+                <div className="text-center mb-20">
+                    <div className="inline-flex items-center gap-2 bg-accent/10 px-4 py-1.5 rounded-full border border-accent/20 mb-6">
+                        <span className="text-[10px] font-black uppercase tracking-[0.2em] text-accent">Loved by many</span>
+                    </div>
+                    <h2 className="text-5xl md:text-7xl font-outfit font-black italic mb-6 leading-tight">
+                        Guest <span className="text-accent">Stories</span>
+                    </h2>
+                    <p className="text-gray-400 font-bold max-w-xl mx-auto">What people are saying about their LoudKitchen experience.</p>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
                     {reviews.map(review => (
-                        <div key={review.id} className="bg-primary p-8 rounded-3xl relative border border-white/5 hover:border-accent/20 transition-all duration-300">
-                            <Quote size={40} className="absolute top-4 right-8 opacity-5 text-accent" />
-                            <div className="flex gap-1 mb-6">
-                                {[...Array(review.rating)].map((_, i) => <Star key={i} size={14} fill="var(--color-accent, #e8b86d)" color="var(--color-accent, #e8b86d)" />)}
-                            </div>
-                            <p className="text-gray-300 mb-8 italic leading-relaxed">"{review.feedback}"</p>
-                            <div className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-full bg-accent text-black flex items-center justify-center font-bold">
-                                    {review.name[0].toUpperCase()}
-                                </div>
-                                <h4 className="font-bold text-white uppercase tracking-wider text-xs">{review.name}</h4>
-                            </div>
-                        </div>
+                        <ReviewCard key={review.id} review={review} />
                     ))}
                 </div>
 
-                <div className="text-center mt-12">
-                    <Link to="/reviews" className="inline-flex items-center gap-2 text-accent hover:underline font-medium">
-                        Read All Reviews <ArrowRight size={16} />
+                <div className="text-center mt-20">
+                    <Link to="/reviews" className="btn bg-white/5 text-white border-2 border-white/5 hover:border-accent/20 transition-all font-black uppercase tracking-widest text-xs py-5 px-10 rounded-full">
+                        Read All Stories
                     </Link>
                 </div>
             </div>
@@ -77,9 +71,15 @@ const FeaturedReviews = () => {
 
 const Home = () => {
     const { siteSettings, menuItems } = useData();
+    const [isLoaded, setIsLoaded] = useState(false);
+
+    useEffect(() => {
+        setIsLoaded(true);
+    }, []);
 
     // Get 3 featured items (just taking the first 3 for now)
     const featuredItems = menuItems.slice(0, 3);
+    const featuredMenu = menuItems; // Using full menu for categories section
 
     // Use siteSettings video if available, otherwise fallback to local asset
     const videoSource = siteSettings?.hero_video_url || heroVideo;
@@ -118,46 +118,101 @@ const Home = () => {
                 </video>
 
                 <div className="relative z-10 text-center container">
-                    <h1 className="text-6xl md:text-8xl font-bold mb-4 tracking-tight animate-fade-in-up">
-                        {renderStyledText(siteSettings?.hero_title, <>LOUD<span className="text-accent">KITCHEN</span></>)}
-                    </h1>
-                    <p className="text-xl md:text-2xl mb-8 max-w-2xl mx-auto text-gray-300">
-                        {siteSettings?.hero_subtitle || 'A symphony of flavors in a vibrant atmosphere.'}
-                    </p>
-                    <div className="flex gap-4 justify-center">
-                        <Link to="/book" className="btn btn-primary">Book a Table</Link>
-                        <Link to="/menu" className="btn btn-outline">View Menu</Link>
+                    <div className={`hero-content max-w-4xl mx-auto transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
+                        <div className="inline-flex items-center gap-2 bg-accent/10 px-4 py-1.5 rounded-full border border-accent/20 mb-8 backdrop-blur-sm">
+                            <Utensils size={14} className="text-accent" />
+                            <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-accent">LoudKitchen Experience</span>
+                        </div>
+                        <h1 className="text-5xl md:text-7xl lg:text-9xl font-black mb-8 leading-[0.9] tracking-tighter">
+                            SOUND OF <br />
+                            <span className="text-accent italic">FLAVOUR</span>
+                        </h1>
+                        <p className="text-lg md:text-xl text-gray-400 mb-12 max-w-2xl mx-auto font-medium leading-relaxed italic">
+                            Experience the fusion of culinary art and vibrant atmosphere. <br className="hidden md:block" />
+                            Where every bite has a rhythm of its own.
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+                            <Link to="/menu" className="btn bg-accent text-black px-12 py-5 font-black uppercase tracking-[0.2em] text-xs rounded-full hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-accent/20 w-full sm:w-auto">
+                                Explore Menu
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </section>
 
             {/* Intro Section */}
-            <section className="section bg-secondary text-center">
+            <section className="section bg-secondary text-center py-32 rounded-t-[80px] -mt-20 relative z-10 font-outfit">
                 <div className="container">
-                    <h2 className="text-4xl mb-6">
+                    <div className="mb-10 inline-block bg-accent/10 p-4 rounded-[30px]">
+                        <Utensils size={32} className="text-accent" />
+                    </div>
+                    <h2 className="text-5xl md:text-7xl font-outfit font-black italic mb-8 leading-tight">
                         {renderStyledText(siteSettings?.about_title, <>Taste the <span className="text-accent">Rhythm</span></>)}
                     </h2>
-                    <p className="max-w-3xl mx-auto text-lg text-gray-400 mb-10">
+                    <p className="max-w-3xl mx-auto text-xl text-gray-400 mb-16 font-bold leading-relaxed italic">
                         {siteSettings?.about_text || 'At Loudkitchen, we believe dining is an experience that engages all senses. From our carefully curated playlists to our visually stunning dishes, every detail is designed to amplify your evening.'}
                     </p>
-                    <img
-                        src={siteSettings?.about_image_url || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1200"}
-                        alt="Restaurant Interior"
-                        className="w-full h-96 object-cover rounded-lg shadow-2xl opacity-80"
-                    />
+                    <div className="relative inline-block group">
+                        <div className="absolute -inset-4 bg-accent/20 blur-2xl rounded-[80px] opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
+                        <img
+                            src={siteSettings?.about_image_url || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&q=80&w=1200"}
+                            alt="Restaurant Interior"
+                            className="relative w-full h-[600px] object-cover rounded-[60px] shadow-2xl transition-transform duration-700 group-hover:scale-[1.02]"
+                        />
+                    </div>
+                </div>
+            </section>
+
+            {/* Categories / Teaser */}
+            <section className="py-24 md:py-32 relative">
+                <div className="container px-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10 md:gap-16">
+                        <div className="space-y-6">
+                            <div className="w-16 h-1 bg-accent mb-10"></div>
+                            <h2 className="text-4xl md:text-5xl font-black tracking-tight leading-none uppercase italic">The Kitchen <br /> <span className="text-accent">Rhythm</span></h2>
+                            <p className="text-gray-400 font-medium leading-relaxed">
+                                Our kitchen operates like a symphony. Every ingredient is a note, and every dish is a masterpiece designed to move your soul.
+                            </p>
+                            <Link to="/about" className="inline-flex items-center gap-2 text-accent font-black uppercase tracking-[0.2em] text-[10px] group">
+                                Learn Our Story <ArrowRight size={14} className="group-hover:translate-x-2 transition-transform" />
+                            </Link>
+                        </div>
+
+                        <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-8 md:gap-10">
+                            {featuredMenu.slice(0, 4).map((dish, i) => (
+                                <Link
+                                    to={`/menu/${dish.id}`}
+                                    key={dish.id}
+                                    className="group relative h-[300px] md:h-[400px] rounded-[40px] overflow-hidden border-2 border-white/5 shadow-xl hover:border-accent/20 transition-all duration-700"
+                                >
+                                    <img src={dish.image_url} alt={dish.name} className="w-full h-full object-cover grayscale-[0.5] group-hover:grayscale-0 transition-all duration-1000 group-hover:scale-110" />
+                                    <div className="absolute inset-x-0 bottom-0 p-8 bg-gradient-to-t from-black/90 via-black/40 to-transparent">
+                                        <p className="text-[10px] font-black tracking-[0.3em] uppercase text-accent mb-2">{dish.category}</p>
+                                        <h3 className="text-2xl font-black text-white italic truncate">{dish.name}</h3>
+                                    </div>
+                                    <div className="absolute top-6 right-6 bg-accent text-black font-black px-4 py-2 rounded-full text-xs opacity-0 group-hover:opacity-100 transition-opacity">
+                                        ₦{dish.price.toLocaleString()}
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
                 </div>
             </section>
 
             {/* Featured Menu */}
-            <section className="section bg-primary">
+            <section className="section bg-[#080808] py-40 font-outfit">
                 <div className="container">
-                    <div className="flex justify-between items-end mb-12">
+                    <div className="flex flex-col md:flex-row justify-between items-center md:items-end mb-20 text-center md:text-left gap-8">
                         <div>
-                            <h2 className="mb-2">Signature <span className="text-accent">Dishes</span></h2>
-                            <p className="text-gray-400">Culinary masterpieces you shouldn't miss.</p>
+                            <div className="inline-flex items-center gap-2 bg-accent/10 px-4 py-1.5 rounded-full border border-accent/20 mb-6">
+                                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-accent">Chef's Favorites</span>
+                            </div>
+                            <h2 className="text-5xl md:text-7xl font-outfit font-black italic leading-tight">Signature <span className="text-accent">Dishes</span></h2>
+                            <p className="text-gray-400 font-bold mt-4">Culinary masterpieces you shouldn't miss.</p>
                         </div>
-                        <Link to="/menu" className="flex items-center gap-2 text-accent hover:text-white transition-colors">
-                            View Full Menu <ArrowRight size={20} />
+                        <Link to="/menu" className="btn bg-accent text-black font-black uppercase tracking-widest text-xs py-5 px-10 rounded-full shadow-xl hover:scale-110 active:scale-95 transition-all flex items-center justify-center gap-2 whitespace-nowrap w-full sm:w-auto">
+                            Explore Menu <ArrowRight size={18} />
                         </Link>
                     </div>
 
@@ -166,42 +221,42 @@ const Home = () => {
                             <Link
                                 to={`/menu/${item.id}`}
                                 key={item.id}
-                                className="bg-secondary rounded-xl overflow-hidden group hover:-translate-y-2 transition-all duration-300 block border border-transparent hover:border-gray-800"
+                                className="bg-secondary/40 backdrop-blur-xl rounded-[60px] overflow-hidden group hover:bg-secondary/60 transition-all duration-700 block border-2 border-white/5 hover:border-accent/20 shadow-xl"
                             >
                                 {/* Image Container */}
-                                <div className="relative h-64 overflow-hidden">
+                                <div className="relative h-80 overflow-hidden m-4 rounded-[45px]">
                                     <img
                                         src={item.image_url}
                                         alt={item.name}
-                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                                        className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                                     />
                                     {/* Price Overlay */}
-                                    <div className="absolute top-4 right-4 bg-black/70 backdrop-blur-md px-3 py-1.5 rounded-lg border border-white/10 shadow-lg">
-                                        <span className="text-accent font-bold text-lg">₦{item.price}</span>
+                                    <div className="absolute bottom-6 right-6 bg-accent p-4 rounded-full shadow-2xl -rotate-12 group-hover:rotate-0 transition-transform duration-500">
+                                        <span className="text-black font-black text-xs uppercase tracking-widest leading-none">₦{item.price.toLocaleString()}</span>
                                     </div>
                                 </div>
 
                                 {/* Content Container */}
-                                <div className="p-6">
-                                    <div className="mb-4">
-                                        <h3 className="text-2xl font-heading mb-2 group-hover:text-accent transition-colors">
+                                <div className="p-10 pt-4">
+                                    <div className="mb-6">
+                                        <h3 className="text-3xl font-outfit font-black italic mb-4 group-hover:text-accent transition-colors leading-tight">
                                             {item.name}
                                         </h3>
-                                        <p className="text-gray-400 text-sm line-clamp-3 leading-relaxed">
+                                        <p className="text-gray-400 font-bold text-sm line-clamp-2 leading-relaxed italic">
                                             {item.description}
                                         </p>
                                     </div>
 
-                                    <div className="flex justify-between items-center pt-4">
-                                        <span className={`text-xs px-2.5 py-1 rounded-full ${item.is_available
-                                            ? 'text-green-400 bg-green-500/10'
-                                            : 'text-red-400 bg-red-500/10'
+                                    <div className="flex justify-between items-center pt-6 border-t border-white/5">
+                                        <span className={`text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-full ${item.is_available
+                                            ? 'text-accent bg-accent/10'
+                                            : 'text-gray-500 bg-white/5'
                                             }`}>
-                                            {item.is_available ? 'In Stock' : 'Sold Out'}
+                                            {item.is_available ? 'Ready Now ✨' : 'Sold Out'}
                                         </span>
 
-                                        <span className="text-accent text-sm font-medium flex items-center gap-1 group-hover:translate-x-1 transition-transform">
-                                            Details <ArrowRight size={14} />
+                                        <span className="text-accent font-black uppercase tracking-widest text-[10px] flex items-center gap-2 group-hover:translate-x-2 transition-transform">
+                                            Taste It <ArrowRight size={14} />
                                         </span>
                                     </div>
                                 </div>

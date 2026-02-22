@@ -41,8 +41,8 @@ function App() {
         <Route index element={<Home />} />
         <Route path="menu" element={<Menu />} />
         <Route path="menu/:id" element={<DishDetail />} />
-        <Route path="book" element={<Book />} />
-        <Route path="gallery" element={<Gallery />} />
+        {/* <Route path="book" element={<Book />} /> */}
+        {/* <Route path="gallery" element={<Gallery />} /> */}
         <Route path="blog" element={<Blog />} />
         <Route path="blog/:id" element={<BlogDetail />} />
         <Route path="about" element={<About />} />
