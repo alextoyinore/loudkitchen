@@ -123,14 +123,14 @@ const Home = () => {
                             <Utensils size={14} className="text-accent" />
                             <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-accent">LoudKitchen Experience</span>
                         </div>
-                        <h1 className="text-5xl md:text-7xl lg:text-9xl font-black mb-8 leading-[0.9] tracking-tighter">
+                        {/* <h1 className="text-5xl md:text-7xl lg:text-9xl font-black mb-8 leading-[0.9] tracking-tighter">
                             SOUND OF <br />
                             <span className="text-accent italic">FLAVOUR</span>
-                        </h1>
-                        <p className="text-lg md:text-xl text-gray-400 mb-12 max-w-2xl mx-auto font-medium leading-relaxed italic">
+                        </h1> */}
+                        {/* <p className="text-lg md:text-xl text-gray-400 mb-12 max-w-2xl mx-auto font-medium leading-relaxed italic">
                             Experience the fusion of culinary art and vibrant atmosphere. <br className="hidden md:block" />
                             Where every bite has a rhythm of its own.
-                        </p>
+                        </p> */}
                         <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
                             <Link to="/menu" className="btn bg-accent text-black px-12 py-5 font-black uppercase tracking-[0.2em] text-xs rounded-full hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-accent/20 w-full sm:w-auto">
                                 Explore Menu
