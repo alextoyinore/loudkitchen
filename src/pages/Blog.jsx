@@ -50,7 +50,7 @@ const Blog = () => {
                         >
                             <div className="h-48 md:h-auto md:w-[35%] lg:w-[380px] overflow-hidden relative flex-shrink-0">
                                 <img
-                                    src={post.image_url}
+                                    src={post.cover_image}
                                     alt={post.title}
                                     className="w-full h-full object-cover grayscale-[0.3] group-hover:grayscale-0 transition-transform duration-1000 group-hover:scale-105"
                                 />
