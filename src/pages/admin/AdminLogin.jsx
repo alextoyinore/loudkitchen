@@ -2,15 +2,92 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../context/useAuth';
 import logoLight from '../../assets/logo_light.png';
-import { LogIn, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { LogIn, Eye, EyeOff, Loader2, MailCheck, RefreshCw } from 'lucide-react';
 
+// ─── Resend Verification Block ───────────────────────────────────────────────
+const ResendVerificationBlock = ({ email }) => {
+    const { resendVerificationEmail } = useAuth();
+    const [resending, setResending] = useState(false);
+    const [resendSuccess, setResendSuccess] = useState(false);
+    const [resendError, setResendError] = useState('');
+
+    const handleResend = async () => {
+        if (!email) return;
+        setResending(true);
+        setResendError('');
+        setResendSuccess(false);
+        try {
+            await resendVerificationEmail(email);
+            setResendSuccess(true);
+        } catch (err) {
+            setResendError(err.message || 'Failed to resend. Please try again.');
+        } finally {
+            setResending(false);
+        }
+    };
+
+    return (
+        <div style={{
+            marginTop: '1rem',
+            background: 'rgba(232,184,109,0.08)',
+            border: '1px solid rgba(232,184,109,0.25)',
+            borderRadius: '10px',
+            padding: '1rem 1.2rem',
+        }}>
+            <p style={{ color: '#e8b86d', fontSize: '0.85rem', margin: '0 0 0.75rem', lineHeight: 1.5 }}>
+                <strong>Email not verified.</strong> Please check your inbox or resend the verification email.
+            </p>
+
+            {resendSuccess ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#4ade80', fontSize: '0.85rem' }}>
+                    <MailCheck size={16} />
+                    Verification email sent! Check your inbox.
+                </div>
+            ) : (
+                <>
+                    <button
+                        onClick={handleResend}
+                        disabled={resending || !email}
+                        style={{
+                            display: 'flex', alignItems: 'center', gap: '0.4rem',
+                            background: 'rgba(232,184,109,0.15)',
+                            border: '1px solid rgba(232,184,109,0.4)',
+                            color: '#e8b86d',
+                            borderRadius: '6px',
+                            padding: '0.45rem 0.9rem',
+                            fontSize: '0.82rem',
+                            fontWeight: '600',
+                            cursor: (resending || !email) ? 'not-allowed' : 'pointer',
+                            opacity: (resending || !email) ? 0.6 : 1,
+                            transition: 'all 0.2s',
+                        }}
+                    >
+                        {resending
+                            ? <><Loader2 size={14} className="animate-spin" /> Sending…</>
+                            : <><RefreshCw size={14} /> Resend Verification Email</>
+                        }
+                    </button>
+                    {resendError && (
+                        <p style={{ color: '#f87171', fontSize: '0.8rem', marginTop: '0.5rem' }}>{resendError}</p>
+                    )}
+                    {!email && (
+                        <p style={{ color: '#888', fontSize: '0.8rem', marginTop: '0.5rem' }}>Enter your email above to resend.</p>
+                    )}
+                </>
+            )}
+        </div>
+    );
+};
+
+// ─── Admin Login Page ─────────────────────────────────────────────────────────
 const AdminLogin = () => {
-    const { signIn, profile, user, isLoading, isAdmin, signOut, status } = useAuth();
+    const { signIn, user, isLoading, isAdmin, signOut, status, resendVerificationEmail } = useAuth();
     const navigate = useNavigate();
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [error, setError] = useState('');
+    const [emailUnverified, setEmailUnverified] = useState(false);
     const [submitting, setSubmitting] = useState(false);
 
     useEffect(() => {
@@ -27,6 +104,7 @@ const AdminLogin = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
+        setEmailUnverified(false);
         setSubmitting(true);
 
         try {
@@ -34,7 +112,16 @@ const AdminLogin = () => {
             // Redirection is handled by the useEffect above
         } catch (err) {
             console.error('Login error:', err);
-            setError(err.message || 'Invalid email or password.');
+            // Supabase returns 'Email not confirmed' for unverified accounts
+            if (
+                err.message?.toLowerCase().includes('email not confirmed') ||
+                err.message?.toLowerCase().includes('email_not_confirmed')
+            ) {
+                setEmailUnverified(true);
+                setError('');
+            } else {
+                setError(err.message || 'Invalid email or password.');
+            }
             setSubmitting(false);
         }
     };
@@ -71,7 +158,7 @@ const AdminLogin = () => {
                         <input
                             type="email"
                             value={email}
-                            onChange={e => setEmail(e.target.value)}
+                            onChange={e => { setEmail(e.target.value); setEmailUnverified(false); }}
                             required
                             placeholder="admin@loudkitchen.com"
                             style={{
@@ -147,6 +234,16 @@ const AdminLogin = () => {
                         {submitting ? 'Authenticating...' : 'Sign In'}
                     </button>
                 </form>
+
+                {/* General error */}
+                {error && !emailUnverified && (
+                    <p style={{ color: '#f87171', fontSize: '0.85rem', marginTop: '1rem', textAlign: 'center' }}>
+                        {error}
+                    </p>
+                )}
+
+                {/* Unverified email prompt */}
+                {emailUnverified && <ResendVerificationBlock email={email} />}
 
                 {user && (
                     <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.08)', textAlign: 'center' }}>

@@ -2,9 +2,8 @@
 import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../context/useAuth';
-import {
-    Utensils, BookOpen, Users, Image, CalendarCheck
-} from 'lucide-react';
+import { Utensils, BookOpen, Users, Image, CalendarCheck } from 'lucide-react';
+import useIsMobile from '../../hooks/useIsMobile';
 
 const StatCard = (props) => {
     const { title, value, icon: Icon, accent } = props;
@@ -13,22 +12,22 @@ const StatCard = (props) => {
             background: '#1a1a1a',
             border: '1px solid rgba(255,255,255,0.07)',
             borderRadius: '12px',
-            padding: '1.5rem',
+            padding: '1.25rem',
             display: 'flex',
             alignItems: 'center',
             gap: '1rem',
         }}>
             <div style={{
-                width: '48px', height: '48px', borderRadius: '12px',
+                width: '46px', height: '46px', borderRadius: '12px',
                 background: accent + '22',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: accent, flexShrink: 0,
             }}>
-                <Icon size={22} />
+                <Icon size={20} />
             </div>
             <div>
-                <p style={{ color: '#666', fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.25rem' }}>{title}</p>
-                <p style={{ fontSize: '1.75rem', fontWeight: '700', color: '#fff' }}>{value ?? '—'}</p>
+                <p style={{ color: '#666', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.2rem' }}>{title}</p>
+                <p style={{ fontSize: '1.6rem', fontWeight: '700', color: '#fff' }}>{value ?? '—'}</p>
             </div>
         </div>
     );
@@ -45,6 +44,7 @@ const statusStyle = (status) => {
 
 const Dashboard = () => {
     const { profile } = useAuth();
+    const isMobile = useIsMobile();
     const [stats, setStats] = useState({ menu: null, blog: null, staff: null, gallery: null, pending: null });
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -60,13 +60,7 @@ const Dashboard = () => {
                     supabase.from('bookings').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
                     supabase.from('bookings').select('*').order('created_at', { ascending: false }).limit(8),
                 ]);
-                setStats({
-                    menu: menu.count,
-                    blog: blog.count,
-                    staff: staff.count,
-                    gallery: gallery.count,
-                    pending: pending.count,
-                });
+                setStats({ menu: menu.count, blog: blog.count, staff: staff.count, gallery: gallery.count, pending: pending.count });
                 setBookings(recentBookings.data || []);
             } catch (err) {
                 console.error('Error fetching dashboard stats:', err);
@@ -83,15 +77,15 @@ const Dashboard = () => {
     return (
         <div>
             {/* Header */}
-            <div style={{ marginBottom: '2rem' }}>
-                <h1 style={{ fontSize: '1.75rem', fontWeight: '700', color: '#fff' }}>
+            <div style={{ marginBottom: '1.5rem' }}>
+                <h1 style={{ fontSize: isMobile ? '1.4rem' : '1.75rem', fontWeight: '700', color: '#fff' }}>
                     {greeting}, {profile?.full_name?.split(' ')[0] || 'Admin'} 👋
                 </h1>
-                <p style={{ color: '#666', marginTop: '0.25rem' }}>Here's what's happening with LoudKitchen today.</p>
+                <p style={{ color: '#666', marginTop: '0.25rem', fontSize: '0.875rem' }}>Here's what's happening with LoudKitchen today.</p>
             </div>
 
             {/* Stats */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem', marginBottom: '2rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem', marginBottom: '2rem' }}>
                 <StatCard title="Menu Items" value={stats.menu} icon={Utensils} accent="#e8b86d" />
                 <StatCard title="Blog Posts" value={stats.blog} icon={BookOpen} accent="#818cf8" />
                 <StatCard title="Staff Members" value={stats.staff} icon={Users} accent="#34d399" />
@@ -100,13 +94,8 @@ const Dashboard = () => {
             </div>
 
             {/* Recent Bookings */}
-            <div style={{
-                background: '#1a1a1a',
-                border: '1px solid rgba(255,255,255,0.07)',
-                borderRadius: '12px',
-                overflow: 'hidden',
-            }}>
-                <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', overflow: 'hidden' }}>
+                <div style={{ padding: '1.1rem 1.25rem', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <h2 style={{ fontSize: '1rem', fontWeight: '600', color: '#fff' }}>Recent Bookings</h2>
                     <span style={{ fontSize: '0.8rem', color: '#555' }}>Latest 8</span>
                 </div>
@@ -114,7 +103,26 @@ const Dashboard = () => {
                     <div style={{ padding: '2rem', textAlign: 'center', color: '#555' }}>Loading…</div>
                 ) : bookings.length === 0 ? (
                     <div style={{ padding: '2rem', textAlign: 'center', color: '#555' }}>No bookings yet.</div>
+                ) : isMobile ? (
+                    // Mobile: Card list
+                    <div style={{ padding: '0.5rem 0' }}>
+                        {bookings.map(b => {
+                            const s = statusStyle(b.status);
+                            return (
+                                <div key={b.id} style={{ padding: '0.85rem 1.25rem', borderBottom: '1px solid rgba(255,255,255,0.04)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div>
+                                        <p style={{ color: '#ddd', fontWeight: '600', fontSize: '0.875rem' }}>{b.name}</p>
+                                        <p style={{ color: '#555', fontSize: '0.75rem', marginTop: '0.15rem' }}>{b.date} · {b.time} · {b.guests} guests</p>
+                                    </div>
+                                    <span style={{ background: s.bg, color: s.color, padding: '0.2rem 0.55rem', borderRadius: '999px', fontSize: '0.7rem', fontWeight: '600', textTransform: 'capitalize', flexShrink: 0 }}>
+                                        {b.status}
+                                    </span>
+                                </div>
+                            );
+                        })}
+                    </div>
                 ) : (
+                    // Desktop: Full table
                     <div style={{ overflowX: 'auto' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
                             <thead>
@@ -134,11 +142,7 @@ const Dashboard = () => {
                                             <td style={{ padding: '0.85rem 1.5rem', color: '#aaa' }}>{b.time}</td>
                                             <td style={{ padding: '0.85rem 1.5rem', color: '#aaa' }}>{b.guests}</td>
                                             <td style={{ padding: '0.85rem 1.5rem' }}>
-                                                <span style={{
-                                                    background: s.bg, color: s.color,
-                                                    padding: '0.25rem 0.65rem', borderRadius: '999px',
-                                                    fontSize: '0.75rem', fontWeight: '600', textTransform: 'capitalize',
-                                                }}>
+                                                <span style={{ background: s.bg, color: s.color, padding: '0.25rem 0.65rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: '600', textTransform: 'capitalize' }}>
                                                     {b.status}
                                                 </span>
                                             </td>

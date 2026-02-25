@@ -32,6 +32,7 @@ import UsersManager from './pages/admin/UsersManager';
 import Settings from './pages/admin/Settings';
 import ReviewManager from './pages/admin/ReviewManager';
 import OrderManager from './pages/admin/OrderManager';
+import AdminProfile from './pages/admin/AdminProfile';
 
 function App() {
   return (
@@ -70,12 +71,13 @@ function App() {
         <Route path="menu" element={<MenuEditor />} />
         <Route path="blog" element={<BlogEditor />} />
         <Route path="staff" element={<StaffEditor />} />
-        <Route path="gallery" element={<GalleryEditor />} />
-        <Route path="bookings" element={<Bookings />} />
+        <Route path="gallery" element={<ProtectedRoute superAdminOnly={true}><GalleryEditor /></ProtectedRoute>} />
+        <Route path="bookings" element={<ProtectedRoute superAdminOnly={true}><Bookings /></ProtectedRoute>} />
         <Route path="users" element={<ProtectedRoute superAdminOnly={true}><UsersManager /></ProtectedRoute>} />
         <Route path="settings" element={<ProtectedRoute superAdminOnly={true}><Settings /></ProtectedRoute>} />
         <Route path="reviews" element={<ReviewManager />} />
         <Route path="orders" element={<OrderManager />} />
+        <Route path="profile" element={<AdminProfile />} />
       </Route>
     </Routes>
   );

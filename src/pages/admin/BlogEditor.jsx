@@ -2,6 +2,7 @@
 import { supabase } from '../../lib/supabase';
 import { uploadToCloudinary } from '../../lib/cloudinary';
 import { Plus, Pencil, Trash2, X, Save, ImagePlus, Loader, Eye, EyeOff } from 'lucide-react';
+import useIsMobile from '../../hooks/useIsMobile';
 
 const emptyForm = { title: '', slug: '', excerpt: '', content: '', cover_image: '', author: '', tags: '', published: false };
 
@@ -15,6 +16,7 @@ const inputStyle = {
 const slugify = (str) => str.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
 const BlogEditor = () => {
+    const isMobile = useIsMobile();
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
@@ -99,9 +101,9 @@ const BlogEditor = () => {
 
     return (
         <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
                 <div>
-                    <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#fff' }}>Blog Posts</h1>
+                    <h1 style={{ fontSize: isMobile ? '1.3rem' : '1.5rem', fontWeight: '700', color: '#fff' }}>Blog Posts</h1>
                     <p style={{ color: '#666', fontSize: '0.875rem', marginTop: '0.2rem' }}>{posts.length} posts total</p>
                 </div>
                 <button onClick={openAdd} style={{
@@ -123,35 +125,41 @@ const BlogEditor = () => {
                     {posts.map(post => (
                         <div key={post.id} style={{
                             background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.07)',
-                            borderRadius: '12px', padding: '1.25rem',
-                            display: 'flex', alignItems: 'center', gap: '1rem',
+                            borderRadius: '12px', padding: '1rem',
+                            display: 'flex', alignItems: isMobile ? 'flex-start' : 'center',
+                            flexDirection: isMobile ? 'column' : 'row', gap: '0.75rem',
                         }}>
-                            {post.cover_image ? (
-                                <img src={post.cover_image} alt={post.title} style={{ width: '80px', height: '60px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} />
-                            ) : (
-                                <div style={{ width: '80px', height: '60px', background: '#222', borderRadius: '8px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#444' }}>
-                                    <ImagePlus size={20} />
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', width: '100%' }}>
+                                {post.cover_image ? (
+                                    <img src={post.cover_image} alt={post.title} style={{ width: '64px', height: '50px', objectFit: 'cover', borderRadius: '8px', flexShrink: 0 }} />
+                                ) : (
+                                    <div style={{ width: '64px', height: '50px', background: '#222', borderRadius: '8px', flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#444' }}>
+                                        <ImagePlus size={18} />
+                                    </div>
+                                )}
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                    <h3 style={{ color: '#fff', fontWeight: '600', fontSize: '0.9rem', marginBottom: '0.2rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{post.title}</h3>
+                                    <p style={{ color: '#555', fontSize: '0.78rem' }}>/{post.slug} · {post.author || 'Unknown'}</p>
                                 </div>
-                            )}
-                            <div style={{ flex: 1, minWidth: 0 }}>
-                                <h3 style={{ color: '#fff', fontWeight: '600', fontSize: '0.95rem', marginBottom: '0.2rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{post.title}</h3>
-                                <p style={{ color: '#555', fontSize: '0.8rem' }}>/{post.slug} · {post.author || 'Unknown'}</p>
+                                {!isMobile && (
+                                    <span style={{ fontSize: '0.75rem', padding: '0.2rem 0.65rem', borderRadius: '999px', background: post.published ? 'rgba(34,197,94,0.15)' : 'rgba(255,255,255,0.07)', color: post.published ? '#4ade80' : '#666', flexShrink: 0 }}>
+                                        {post.published ? 'Published' : 'Draft'}
+                                    </span>
+                                )}
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0 }}>
-                                <span style={{
-                                    fontSize: '0.75rem', padding: '0.2rem 0.65rem', borderRadius: '999px',
-                                    background: post.published ? 'rgba(34,197,94,0.15)' : 'rgba(255,255,255,0.07)',
-                                    color: post.published ? '#4ade80' : '#666',
-                                }}>
-                                    {post.published ? 'Published' : 'Draft'}
-                                </span>
-                                <button onClick={() => togglePublish(post)} title={post.published ? 'Unpublish' : 'Publish'} style={{ background: 'rgba(255,255,255,0.07)', border: 'none', borderRadius: '6px', padding: '0.4rem', color: '#aaa', cursor: 'pointer' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexShrink: 0, width: isMobile ? '100%' : 'auto' }}>
+                                {isMobile && (
+                                    <span style={{ fontSize: '0.72rem', padding: '0.2rem 0.6rem', borderRadius: '999px', background: post.published ? 'rgba(34,197,94,0.15)' : 'rgba(255,255,255,0.07)', color: post.published ? '#4ade80' : '#666', marginRight: 'auto' }}>
+                                        {post.published ? 'Published' : 'Draft'}
+                                    </span>
+                                )}
+                                <button onClick={() => togglePublish(post)} title={post.published ? 'Unpublish' : 'Publish'} style={{ background: 'rgba(255,255,255,0.07)', border: 'none', borderRadius: '6px', padding: '0.45rem', color: '#aaa', cursor: 'pointer' }}>
                                     {post.published ? <EyeOff size={14} /> : <Eye size={14} />}
                                 </button>
-                                <button onClick={() => openEdit(post)} style={{ background: 'rgba(255,255,255,0.07)', border: 'none', borderRadius: '6px', padding: '0.4rem', color: '#aaa', cursor: 'pointer' }}>
+                                <button onClick={() => openEdit(post)} style={{ background: 'rgba(255,255,255,0.07)', border: 'none', borderRadius: '6px', padding: '0.45rem', color: '#aaa', cursor: 'pointer' }}>
                                     <Pencil size={14} />
                                 </button>
-                                <button onClick={() => handleDelete(post.id)} style={{ background: 'rgba(239,68,68,0.1)', border: 'none', borderRadius: '6px', padding: '0.4rem', color: '#f87171', cursor: 'pointer' }}>
+                                <button onClick={() => handleDelete(post.id)} style={{ background: 'rgba(239,68,68,0.1)', border: 'none', borderRadius: '6px', padding: '0.45rem', color: '#f87171', cursor: 'pointer' }}>
                                     <Trash2 size={14} />
                                 </button>
                             </div>
@@ -164,12 +172,14 @@ const BlogEditor = () => {
             {showForm && (
                 <div style={{
                     position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    zIndex: 1000, padding: '1rem',
+                    display: 'flex', alignItems: isMobile ? 'flex-end' : 'center', justifyContent: 'center',
+                    zIndex: 1000, padding: isMobile ? '0' : '1rem',
                 }}>
                     <div style={{
                         background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '600px',
+                        borderRadius: isMobile ? '16px 16px 0 0' : '16px',
+                        padding: isMobile ? '1.25rem' : '2rem',
+                        width: '100%', maxWidth: isMobile ? '100%' : '600px',
                         maxHeight: '90vh', overflowY: 'auto',
                     }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
@@ -192,7 +202,7 @@ const BlogEditor = () => {
                                 <label style={{ display: 'block', color: '#aaa', fontSize: '0.8rem', marginBottom: '0.35rem' }}>Slug *</label>
                                 <input style={inputStyle} value={form.slug} onChange={e => setForm(f => ({ ...f, slug: e.target.value }))} required />
                             </div>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1rem' }}>
                                 <div>
                                     <label style={{ display: 'block', color: '#aaa', fontSize: '0.8rem', marginBottom: '0.35rem' }}>Author</label>
                                     <input style={inputStyle} value={form.author} onChange={e => setForm(f => ({ ...f, author: e.target.value }))} />

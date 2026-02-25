@@ -2,6 +2,7 @@
 import { supabase } from '../../lib/supabase';
 import { uploadToCloudinary } from '../../lib/cloudinary';
 import { Save, Loader, ImagePlus, Video, Globe, Smartphone, Mail, MapPin, Instagram, Facebook as FacebookIcon, Twitter as TwitterIcon, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import useIsMobile from '../../hooks/useIsMobile';
 
 const inputStyle = {
     width: '100%', background: 'rgba(255,255,255,0.06)',
@@ -29,6 +30,7 @@ const Field = ({ label, children }) => (
 );
 
 const Settings = () => {
+    const isMobile = useIsMobile();
     const [form, setForm] = useState({
         site_name: '',
         hero_video_url: '',
@@ -130,7 +132,7 @@ const Settings = () => {
             {error && <div style={{ background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '8px', padding: '0.75rem', color: '#f87171', fontSize: '0.85rem', marginBottom: '1.5rem' }}>{error}</div>}
 
             <form onSubmit={handleSave}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', maxWidth: '680px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem', maxWidth: isMobile ? '100%' : '680px' }}>
 
                     {/* General */}
                     <div style={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '1.5rem' }}>
@@ -231,7 +233,7 @@ const Settings = () => {
                     {/* Contact */}
                     <div style={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '1.5rem' }}>
                         <SectionTitle><Mail size={18} /> Contact Information</SectionTitle>
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1rem' }}>
                             <Field label="Email">
                                 <div style={{ position: 'relative' }}>
                                     <input style={inputStyle} type="email" value={form.contact_email} onChange={set('contact_email')} placeholder="hello@loudkitchen.com" />

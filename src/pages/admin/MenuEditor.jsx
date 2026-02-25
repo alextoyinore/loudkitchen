@@ -2,6 +2,7 @@
 import { supabase } from '../../lib/supabase';
 import { uploadToCloudinary } from '../../lib/cloudinary';
 import { Plus, Pencil, Trash2, X, Save, ImagePlus, Loader } from 'lucide-react';
+import useIsMobile from '../../hooks/useIsMobile';
 
 const CATEGORIES = ['Starters', 'Mains', 'Sides', 'Pasta', 'Combo', 'Sandwich', 'Grill', 'Desserts', 'Drinks', 'Specials'];
 
@@ -15,6 +16,7 @@ const inputStyle = {
 };
 
 const MenuEditor = () => {
+    const isMobile = useIsMobile();
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
@@ -86,9 +88,9 @@ const MenuEditor = () => {
 
     return (
         <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
                 <div>
-                    <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#fff' }}>Menu Editor</h1>
+                    <h1 style={{ fontSize: isMobile ? '1.3rem' : '1.5rem', fontWeight: '700', color: '#fff' }}>Menu Editor</h1>
                     <p style={{ color: '#666', fontSize: '0.875rem', marginTop: '0.2rem' }}>{items.length} items total</p>
                 </div>
                 <button onClick={openAdd} style={{
@@ -167,12 +169,14 @@ const MenuEditor = () => {
             {showForm && (
                 <div style={{
                     position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    zIndex: 1000, padding: '1rem',
+                    display: 'flex', alignItems: isMobile ? 'flex-end' : 'center', justifyContent: 'center',
+                    zIndex: 1000, padding: isMobile ? '0' : '1rem',
                 }}>
                     <div style={{
                         background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '520px',
+                        borderRadius: isMobile ? '16px 16px 0 0' : '16px',
+                        padding: isMobile ? '1.25rem' : '2rem',
+                        width: '100%', maxWidth: isMobile ? '100%' : '520px',
                         maxHeight: '90vh', overflowY: 'auto',
                     }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
@@ -195,7 +199,7 @@ const MenuEditor = () => {
                                 <label style={{ display: 'block', color: '#aaa', fontSize: '0.8rem', marginBottom: '0.35rem' }}>Description</label>
                                 <textarea style={{ ...inputStyle, minHeight: '80px', resize: 'vertical' }} value={form.description} onChange={e => setForm(f => ({ ...f, description: e.target.value }))} />
                             </div>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1rem' }}>
                                 <div>
                                     <label style={{ display: 'block', color: '#aaa', fontSize: '0.8rem', marginBottom: '0.35rem' }}>Price (₦) *</label>
                                     <input style={inputStyle} type="number" step="0.01" min="0" value={form.price} onChange={e => setForm(f => ({ ...f, price: e.target.value }))} required />

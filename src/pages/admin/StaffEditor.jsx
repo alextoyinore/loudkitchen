@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { uploadToCloudinary } from '../../lib/cloudinary';
 import { Plus, Pencil, Trash2, X, Save, ImagePlus, Loader } from 'lucide-react';
+import useIsMobile from '../../hooks/useIsMobile';
 
 const emptyForm = { name: '', role: '', bio: '', image_url: '', sort_order: 0 };
 
@@ -13,6 +14,7 @@ const inputStyle = {
 };
 
 const StaffEditor = () => {
+    const isMobile = useIsMobile();
     const [staff, setStaff] = useState([]);
     const [loading, setLoading] = useState(true);
     const [showForm, setShowForm] = useState(false);
@@ -80,9 +82,9 @@ const StaffEditor = () => {
 
     return (
         <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '0.75rem' }}>
                 <div>
-                    <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#fff' }}>Staff</h1>
+                    <h1 style={{ fontSize: isMobile ? '1.3rem' : '1.5rem', fontWeight: '700', color: '#fff' }}>Staff</h1>
                     <p style={{ color: '#666', fontSize: '0.875rem', marginTop: '0.2rem' }}>{staff.length} members</p>
                 </div>
                 <button onClick={openAdd} style={{
@@ -135,12 +137,14 @@ const StaffEditor = () => {
             {showForm && (
                 <div style={{
                     position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    zIndex: 1000, padding: '1rem',
+                    display: 'flex', alignItems: isMobile ? 'flex-end' : 'center', justifyContent: 'center',
+                    zIndex: 1000, padding: isMobile ? '0' : '1rem',
                 }}>
                     <div style={{
                         background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '16px', padding: '2rem', width: '100%', maxWidth: '480px',
+                        borderRadius: isMobile ? '16px 16px 0 0' : '16px',
+                        padding: isMobile ? '1.25rem' : '2rem',
+                        width: '100%', maxWidth: isMobile ? '100%' : '480px',
                         maxHeight: '90vh', overflowY: 'auto',
                     }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>

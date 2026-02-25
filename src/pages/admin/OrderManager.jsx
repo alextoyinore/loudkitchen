@@ -1,20 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../../lib/supabase';
 import {
-    ShoppingBag,
-    Clock,
-    CheckCircle,
-    XCircle,
-    Eye,
-    Search,
-    RefreshCw,
-    Phone,
-    Mail,
-    User,
-    ChevronRight,
-    X,
-    MoreVertical
+    ShoppingBag, Clock, CheckCircle, XCircle, Eye, Search,
+    RefreshCw, Phone, Mail, X, ChevronRight
 } from 'lucide-react';
+import useIsMobile from '../../hooks/useIsMobile';
 
 const OrderManager = () => {
     const [orders, setOrders] = useState([]);
@@ -23,10 +13,9 @@ const OrderManager = () => {
     const [filterStatus, setFilterStatus] = useState('all');
     const [searchTerm, setSearchTerm] = useState('');
     const [updating, setUpdating] = useState(null);
+    const isMobile = useIsMobile();
 
-    useEffect(() => {
-        fetchOrders();
-    }, []);
+    useEffect(() => { fetchOrders(); }, []);
 
     const fetchOrders = async () => {
         setLoading(true);
@@ -34,7 +23,6 @@ const OrderManager = () => {
             .from('orders')
             .select('*, order_items(*)')
             .order('created_at', { ascending: false });
-
         if (!error) setOrders(data || []);
         setLoading(false);
     };
@@ -45,12 +33,9 @@ const OrderManager = () => {
             .from('orders')
             .update({ status: newStatus, updated_at: new Date().toISOString() })
             .eq('id', orderId);
-
         if (!error) {
             setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus } : o));
-            if (selectedOrder?.id === orderId) {
-                setSelectedOrder(prev => ({ ...prev, status: newStatus }));
-            }
+            if (selectedOrder?.id === orderId) setSelectedOrder(prev => ({ ...prev, status: newStatus }));
         }
         setUpdating(null);
     };
@@ -109,76 +94,101 @@ const OrderManager = () => {
     return (
         <div style={{ color: '#fff' }}>
             {/* Header */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
                 <div>
-                    <h1 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#fff' }}>Guest Orders</h1>
+                    <h1 style={{ fontSize: isMobile ? '1.3rem' : '1.5rem', fontWeight: '700', color: '#fff' }}>Guest Orders</h1>
                     <p style={{ color: '#666', fontSize: '0.875rem', marginTop: '0.2rem' }}>
-                        {orders.length} total orders · {counts.pending} pending
+                        {orders.length} total · {counts.pending} pending
                     </p>
                 </div>
-                <button
-                    onClick={fetchOrders}
-                    style={{
-                        display: 'flex', alignItems: 'center', gap: '0.5rem',
-                        background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '8px', padding: '0.6rem 1rem',
-                        color: '#aaa', fontSize: '0.875rem', cursor: 'pointer',
-                    }}
-                >
-                    <RefreshCw size={15} /> Refresh
+                <button onClick={fetchOrders} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px', padding: '0.6rem', color: '#aaa', cursor: 'pointer' }}>
+                    <RefreshCw size={15} />
+                    {!isMobile && <span style={{ fontSize: '0.875rem' }}>Refresh</span>}
                 </button>
             </div>
 
-            {/* Filters + Search */}
-            <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-                {['all', 'pending', 'processing', 'ready', 'completed'].map(s => (
-                    <button
-                        key={s}
-                        onClick={() => setFilterStatus(s)}
-                        style={{
-                            padding: '0.4rem 0.9rem', borderRadius: '999px', border: 'none',
-                            background: filterStatus === s ? 'var(--color-accent, #e8b86d)' : 'rgba(255,255,255,0.07)',
-                            color: filterStatus === s ? '#000' : '#aaa',
-                            fontWeight: filterStatus === s ? '600' : '400',
-                            cursor: 'pointer', fontSize: '0.8rem', textTransform: 'capitalize',
-                        }}
-                    >
-                        {s === 'all' ? 'All' : s} ({counts[s] || filteredOrders.filter(o => o.status === s).length})
-                    </button>
-                ))}
-                <div style={{ marginLeft: 'auto', position: 'relative' }}>
-                    <Search size={15} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#555' }} />
-                    <input
-                        style={{ ...inputStyle, paddingLeft: '2.25rem', width: '220px' }}
-                        placeholder="Search name, phone…"
-                        value={searchTerm}
-                        onChange={e => setSearchTerm(e.target.value)}
-                    />
-                </div>
+            {/* Search */}
+            <div style={{ position: 'relative', marginBottom: '0.75rem' }}>
+                <Search size={15} style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', color: '#555' }} />
+                <input
+                    style={{ ...inputStyle, paddingLeft: '2.25rem', width: '100%', boxSizing: 'border-box' }}
+                    placeholder="Search name, phone…"
+                    value={searchTerm}
+                    onChange={e => setSearchTerm(e.target.value)}
+                />
             </div>
 
-            {/* Table */}
-            <div style={{
-                background: '#1a1a1a',
-                border: '1px solid rgba(255,255,255,0.07)',
-                borderRadius: '12px',
-                overflow: 'hidden',
-            }}>
-                {loading ? (
-                    <div style={{ padding: '3rem', textAlign: 'center', color: '#555' }}>Loading…</div>
-                ) : filteredOrders.length === 0 ? (
-                    <div style={{ padding: '3rem', textAlign: 'center', color: '#555' }}>No orders found.</div>
-                ) : (
+            {/* Filters */}
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
+                {['all', 'pending', 'processing', 'ready', 'completed'].map(s => (
+                    <button key={s} onClick={() => setFilterStatus(s)} style={{
+                        padding: '0.35rem 0.75rem', borderRadius: '999px', border: 'none',
+                        background: filterStatus === s ? 'var(--color-accent, #e8b86d)' : 'rgba(255,255,255,0.07)',
+                        color: filterStatus === s ? '#000' : '#aaa',
+                        fontWeight: filterStatus === s ? '600' : '400',
+                        cursor: 'pointer', fontSize: '0.78rem', textTransform: 'capitalize',
+                    }}>
+                        {s === 'all' ? 'All' : s} ({counts[s] || 0})
+                    </button>
+                ))}
+            </div>
+
+            {/* Content */}
+            {loading ? (
+                <div style={{ padding: '3rem', textAlign: 'center', color: '#555' }}>Loading…</div>
+            ) : filteredOrders.length === 0 ? (
+                <div style={{ padding: '3rem', textAlign: 'center', color: '#555' }}>No orders found.</div>
+            ) : isMobile ? (
+                // ── Mobile card list ──
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                    {filteredOrders.map(order => (
+                        <div key={order.id} style={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', padding: '1rem' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
+                                <div>
+                                    <p style={{ color: '#fff', fontWeight: '600', fontSize: '0.9rem' }}>{order.customer_name}</p>
+                                    <p style={{ color: '#666', fontSize: '0.75rem', marginTop: '0.1rem' }}>{order.customer_phone}</p>
+                                </div>
+                                <StatusBadge status={order.status} />
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                <div>
+                                    <p style={{ color: 'var(--color-accent, #e8b86d)', fontWeight: '700', fontSize: '0.95rem' }}>
+                                        ₦{parseFloat(order.total_amount).toLocaleString()}
+                                    </p>
+                                    <p style={{ color: '#555', fontSize: '0.72rem', marginTop: '0.1rem' }}>
+                                        {order.order_items.length} items · {new Date(order.created_at).toLocaleDateString()}
+                                    </p>
+                                </div>
+                                <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                                    <button onClick={() => setSelectedOrder(order)} style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: '6px', padding: '0.45rem 0.7rem', color: '#aaa', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem' }}>
+                                        <Eye size={14} /> Details
+                                    </button>
+                                    <select
+                                        value={order.status}
+                                        onChange={e => updateOrderStatus(order.id, e.target.value)}
+                                        disabled={updating === order.id}
+                                        style={{ background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '6px', padding: '0.45rem 0.5rem', color: '#aaa', cursor: 'pointer', fontSize: '0.75rem', outline: 'none' }}
+                                    >
+                                        <option value="pending">Pending</option>
+                                        <option value="processing">Processing</option>
+                                        <option value="ready">Ready</option>
+                                        <option value="completed">Completed</option>
+                                        <option value="cancelled">Cancelled</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
+                // ── Desktop table ──
+                <div style={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '12px', overflow: 'hidden' }}>
                     <div style={{ overflowX: 'auto' }}>
                         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem' }}>
                             <thead>
                                 <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
                                     {['Order ID', 'Customer', 'Items', 'Total', 'Status', 'Actions'].map(h => (
-                                        <th key={h} style={{
-                                            padding: '0.85rem 1.25rem', textAlign: 'left',
-                                            color: '#555', fontWeight: '500', whiteSpace: 'nowrap',
-                                            fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em',
-                                        }}>{h}</th>
+                                        <th key={h} style={{ padding: '0.85rem 1.25rem', textAlign: 'left', color: '#555', fontWeight: '500', whiteSpace: 'nowrap', fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{h}</th>
                                     ))}
                                 </tr>
                             </thead>
@@ -193,45 +203,22 @@ const OrderManager = () => {
                                             <p style={{ color: '#fff', fontWeight: '600' }}>{order.customer_name}</p>
                                             <p style={{ color: '#666', fontSize: '0.75rem' }}>{order.customer_phone}</p>
                                         </td>
-                                        <td style={{ padding: '1rem 1.25rem', color: '#aaa' }}>
-                                            {order.order_items.length} items
-                                        </td>
-                                        <td style={{ padding: '1rem 1.25rem', color: 'var(--color-accent, #e8b86d)', fontWeight: '700' }}>
-                                            ₦{parseFloat(order.total_amount).toLocaleString()}
-                                        </td>
-                                        <td style={{ padding: '1rem 1.25rem' }}>
-                                            <StatusBadge status={order.status} />
-                                        </td>
+                                        <td style={{ padding: '1rem 1.25rem', color: '#aaa' }}>{order.order_items.length} items</td>
+                                        <td style={{ padding: '1rem 1.25rem', color: 'var(--color-accent, #e8b86d)', fontWeight: '700' }}>₦{parseFloat(order.total_amount).toLocaleString()}</td>
+                                        <td style={{ padding: '1rem 1.25rem' }}><StatusBadge status={order.status} /></td>
                                         <td style={{ padding: '1rem 1.25rem' }}>
                                             <div style={{ display: 'flex', gap: '0.5rem' }}>
-                                                <button
-                                                    onClick={() => setSelectedOrder(order)}
-                                                    style={{
-                                                        background: 'rgba(255,255,255,0.06)', border: 'none',
-                                                        borderRadius: '6px', padding: '0.4rem 0.6rem',
-                                                        color: '#aaa', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem'
-                                                    }}
-                                                >
+                                                <button onClick={() => setSelectedOrder(order)} style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: '6px', padding: '0.4rem 0.6rem', color: '#aaa', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem' }}>
                                                     <Eye size={14} /> Details
                                                 </button>
-                                                <div style={{ position: 'relative', display: 'flex' }}>
-                                                    <select
-                                                        value={order.status}
-                                                        onChange={(e) => updateOrderStatus(order.id, e.target.value)}
-                                                        disabled={updating === order.id}
-                                                        style={{
-                                                            background: 'rgba(255,255,255,0.06)', border: 'none',
-                                                            borderRadius: '6px', padding: '0.4rem 0.6rem',
-                                                            color: '#aaa', cursor: 'pointer', fontSize: '0.75rem', outline: 'none'
-                                                        }}
-                                                    >
-                                                        <option value="pending">Pending</option>
-                                                        <option value="processing">Processing</option>
-                                                        <option value="ready">Ready</option>
-                                                        <option value="completed">Completed</option>
-                                                        <option value="cancelled">Cancelled</option>
-                                                    </select>
-                                                </div>
+                                                <select value={order.status} onChange={e => updateOrderStatus(order.id, e.target.value)} disabled={updating === order.id}
+                                                    style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: '6px', padding: '0.4rem 0.6rem', color: '#aaa', cursor: 'pointer', fontSize: '0.75rem', outline: 'none' }}>
+                                                    <option value="pending">Pending</option>
+                                                    <option value="processing">Processing</option>
+                                                    <option value="ready">Ready</option>
+                                                    <option value="completed">Completed</option>
+                                                    <option value="cancelled">Cancelled</option>
+                                                </select>
                                             </div>
                                         </td>
                                     </tr>
@@ -239,59 +226,39 @@ const OrderManager = () => {
                             </tbody>
                         </table>
                     </div>
-                )}
-            </div>
+                </div>
+            )}
 
             {/* Detail Modal */}
             {selectedOrder && (
-                <div style={{
-                    position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    zIndex: 1000, padding: '1rem'
-                }}>
-                    <div style={{
-                        background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)',
-                        borderRadius: '16px', width: '100%', maxWidth: '600px',
-                        overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.4)'
-                    }}>
-                        <div style={{ padding: '1.5rem', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', display: 'flex', alignItems: isMobile ? 'flex-end' : 'center', justifyContent: 'center', zIndex: 1000, padding: isMobile ? '0' : '1rem' }}>
+                    <div style={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: isMobile ? '16px 16px 0 0' : '16px', width: '100%', maxWidth: isMobile ? '100%' : '600px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.4)', maxHeight: isMobile ? '90vh' : 'auto' }}>
+                        <div style={{ padding: '1.25rem 1.5rem', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div>
                                 <h2 style={{ fontSize: '1.1rem', fontWeight: '700' }}>Order Details</h2>
                                 <p style={{ fontSize: '0.7rem', color: '#555', fontFamily: 'monospace' }}>ID: {selectedOrder.id}</p>
                             </div>
-                            <button onClick={() => setSelectedOrder(null)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer' }}>
-                                <X size={20} />
-                            </button>
+                            <button onClick={() => setSelectedOrder(null)} style={{ background: 'none', border: 'none', color: '#666', cursor: 'pointer' }}><X size={20} /></button>
                         </div>
-
-                        <div style={{ padding: '1.5rem', maxHeight: '70vh', overflowY: 'auto' }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem', marginBottom: '2rem' }}>
+                        <div style={{ padding: '1.25rem 1.5rem', maxHeight: isMobile ? '70vh' : '70vh', overflowY: 'auto' }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr', gap: '1.25rem', marginBottom: '1.5rem' }}>
                                 <div>
-                                    <h4 style={{ fontSize: '0.7rem', color: '#555', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.75rem' }}>Customer</h4>
+                                    <h4 style={{ fontSize: '0.7rem', color: '#555', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.65rem' }}>Customer</h4>
                                     <p style={{ fontWeight: '600', color: '#fff', marginBottom: '0.25rem' }}>{selectedOrder.customer_name}</p>
-                                    <p style={{ fontSize: '0.85rem', color: '#aaa', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
-                                        <Phone size={14} /> {selectedOrder.customer_phone}
-                                    </p>
-                                    <p style={{ fontSize: '0.85rem', color: '#aaa', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                                        <Mail size={14} /> {selectedOrder.customer_email}
-                                    </p>
+                                    <p style={{ fontSize: '0.85rem', color: '#aaa', display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}><Phone size={14} /> {selectedOrder.customer_phone}</p>
+                                    <p style={{ fontSize: '0.85rem', color: '#aaa', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Mail size={14} /> {selectedOrder.customer_email}</p>
                                 </div>
                                 <div>
-                                    <h4 style={{ fontSize: '0.7rem', color: '#555', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.75rem' }}>Status</h4>
+                                    <h4 style={{ fontSize: '0.7rem', color: '#555', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.65rem' }}>Status</h4>
                                     <StatusBadge status={selectedOrder.status} />
                                     <p style={{ fontSize: '0.8rem', color: '#555', marginTop: '0.5rem' }}>Placed: {new Date(selectedOrder.created_at).toLocaleString()}</p>
                                 </div>
                             </div>
-
-                            <div style={{ marginBottom: '2rem' }}>
-                                <h4 style={{ fontSize: '0.7rem', color: '#555', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.75rem' }}>Items ({selectedOrder.order_items.length})</h4>
+                            <div style={{ marginBottom: '1.5rem' }}>
+                                <h4 style={{ fontSize: '0.7rem', color: '#555', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.65rem' }}>Items ({selectedOrder.order_items.length})</h4>
                                 <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(255,255,255,0.05)' }}>
                                     {selectedOrder.order_items.map((item, idx) => (
-                                        <div key={idx} style={{
-                                            padding: '1rem',
-                                            borderBottom: idx === selectedOrder.order_items.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.05)',
-                                            display: 'flex', justifyContent: 'space-between', alignItems: 'center'
-                                        }}>
+                                        <div key={idx} style={{ padding: '0.85rem 1rem', borderBottom: idx === selectedOrder.order_items.length - 1 ? 'none' : '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                             <div>
                                                 <p style={{ fontWeight: '600', color: '#fff' }}>{item.item_name} <span style={{ color: '#555', fontSize: '0.8rem' }}>x{item.quantity}</span></p>
                                                 <p style={{ fontSize: '0.75rem', color: '#666' }}>₦{parseFloat(item.unit_price).toLocaleString()} each</p>
@@ -299,13 +266,12 @@ const OrderManager = () => {
                                             <p style={{ fontWeight: '700', color: '#aaa' }}>₦{parseFloat(item.subtotal).toLocaleString()}</p>
                                         </div>
                                     ))}
-                                    <div style={{ padding: '1rem', background: 'rgba(232,184,109,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div style={{ padding: '0.85rem 1rem', background: 'rgba(232,184,109,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <span style={{ fontWeight: '700', color: '#fff' }}>Total Amount</span>
-                                        <span style={{ fontWeight: '800', color: 'var(--color-accent, #e8b86d)', fontSize: '1.2rem' }}>₦{parseFloat(selectedOrder.total_amount).toLocaleString()}</span>
+                                        <span style={{ fontWeight: '800', color: 'var(--color-accent, #e8b86d)', fontSize: '1.15rem' }}>₦{parseFloat(selectedOrder.total_amount).toLocaleString()}</span>
                                     </div>
                                 </div>
                             </div>
-
                             {selectedOrder.notes && (
                                 <div style={{ padding: '1rem', background: 'rgba(234,179,8,0.05)', border: '1px solid rgba(234,179,8,0.1)', borderRadius: '12px' }}>
                                     <h4 style={{ fontSize: '0.7rem', color: '#facc15', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: '0.5rem' }}>Special Notes</h4>
@@ -313,23 +279,10 @@ const OrderManager = () => {
                                 </div>
                             )}
                         </div>
-
-                        <div style={{ padding: '1.5rem', borderTop: '1px solid rgba(255,255,255,0.07)', display: 'flex', gap: '0.75rem' }}>
-                            <button
-                                onClick={() => setSelectedOrder(null)}
-                                style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'none', color: '#aaa', cursor: 'pointer' }}
-                            >
-                                Close
-                            </button>
-                            <select
-                                value={selectedOrder.status}
-                                onChange={(e) => updateOrderStatus(selectedOrder.id, e.target.value)}
-                                style={{
-                                    flex: 1, padding: '0.75rem', borderRadius: '8px', border: 'none',
-                                    background: 'var(--color-accent, #e8b86d)', color: '#000',
-                                    fontWeight: '700', cursor: 'pointer', outline: 'none'
-                                }}
-                            >
+                        <div style={{ padding: '1.25rem 1.5rem', borderTop: '1px solid rgba(255,255,255,0.07)', display: 'flex', gap: '0.75rem' }}>
+                            <button onClick={() => setSelectedOrder(null)} style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.1)', background: 'none', color: '#aaa', cursor: 'pointer' }}>Close</button>
+                            <select value={selectedOrder.status} onChange={e => updateOrderStatus(selectedOrder.id, e.target.value)}
+                                style={{ flex: 1, padding: '0.75rem', borderRadius: '8px', border: 'none', background: 'var(--color-accent, #e8b86d)', color: '#000', fontWeight: '700', cursor: 'pointer', outline: 'none' }}>
                                 <option value="pending">Mark as Pending</option>
                                 <option value="processing">Mark as Processing</option>
                                 <option value="ready">Mark as Ready</option>
