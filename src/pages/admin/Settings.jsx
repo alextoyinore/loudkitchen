@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { uploadToCloudinary } from '../../lib/cloudinary';
 import { Save, Loader, ImagePlus, Video, Globe, Smartphone, Mail, MapPin, Instagram, Facebook as FacebookIcon, Twitter as TwitterIcon, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
@@ -59,8 +59,8 @@ const Settings = () => {
 
         setError('');
         const isVideo = file.type.startsWith('video/');
-        const limit = isVideo ? 3 * 1024 * 1024 : 500 * 1024; // 3MB video, 500KB image
-        const limitText = isVideo ? '3MB' : '500KB';
+        const limit = isVideo ? 20 * 1024 * 1024 : 500 * 1024; // 20MB video, 500KB image
+        const limitText = isVideo ? '20MB' : '500KB';
 
         if (file.size > limit) {
             setError(`${isVideo ? 'Video' : 'Image'} file is too large. Max limit is ${limitText}.`);
@@ -178,7 +178,7 @@ const Settings = () => {
                                     color: '#aaa', cursor: 'pointer', fontSize: '0.85rem',
                                     background: 'rgba(255,255,255,0.02)', marginTop: '0.5rem'
                                 }}>
-                                    {uploading.hero ? <><Loader2 size={16} className="animate-spin" /> Uploading...</> : <><Video size={16} /> {form.hero_video_url ? 'Change Video' : 'Upload Video'} (Max 3MB)</>}
+                                    {uploading.hero ? <><Loader2 size={16} className="animate-spin" /> Uploading...</> : <><Video size={16} /> {form.hero_video_url ? 'Change Video' : 'Upload Video'} (Max 20MB)</>}
                                     <input type="file" accept="video/mp4" style={{ display: 'none' }} onChange={(e) => handleUpload(e, 'hero')} disabled={uploading.hero} />
                                 </label>
                                 <input

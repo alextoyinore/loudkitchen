@@ -18,6 +18,8 @@ import Staff from './pages/Staff';
 import Reviews from './pages/Reviews';
 import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
+import NotFound from './pages/NotFound';
+import ServerError from './pages/ServerError';
 
 // Admin Pages
 import AdminLogin from './pages/admin/AdminLogin';
@@ -52,6 +54,8 @@ function App() {
         <Route path="reviews" element={<Reviews />} />
         <Route path="cart" element={<Cart />} />
         <Route path="checkout" element={<Checkout />} />
+        <Route path="/500" element={<ServerError />} />
+        <Route path="*" element={<NotFound />} />
       </Route>
 
       {/* Admin Login & Signup (public) */}
