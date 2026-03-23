@@ -111,7 +111,7 @@ const Home = () => {
                     webkit-playsinline="true"
                     preload="auto"
                     className="absolute top-0 left-0 w-full h-full object-cover z-0"
-                    style={{ filter: 'brightness(0.3)' }}
+                    style={{ filter: 'brightness(0.7)' }}
                 >
                     <source src={videoSource} type="video/mp4" />
                     Your browser does not support the video tag.
