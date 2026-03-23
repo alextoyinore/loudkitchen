@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+﻿import React, { useEffect, useState } from 'react';
 import { supabase } from '../../lib/supabase';
 import { uploadToCloudinary } from '../../lib/cloudinary';
 import { Save, Loader, ImagePlus, Video, Globe, Smartphone, Mail, MapPin, Instagram, Facebook as FacebookIcon, Twitter as TwitterIcon, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
@@ -59,8 +59,8 @@ const Settings = () => {
 
         setError('');
         const isVideo = file.type.startsWith('video/');
-        const limit = isVideo ? 20 * 1024 * 1024 : 500 * 1024; // 20MB video, 500KB image
-        const limitText = isVideo ? '20MB' : '500KB';
+        const limit = isVideo ? 50 * 1024 * 1024 : 500 * 1024; // 20MB video, 500KB image
+        const limitText = isVideo ? '50MB' : '500KB';
 
         if (file.size > limit) {
             setError(`${isVideo ? 'Video' : 'Image'} file is too large. Max limit is ${limitText}.`);

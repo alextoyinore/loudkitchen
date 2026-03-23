@@ -119,10 +119,10 @@ const Home = () => {
 
                 <div className="relative z-10 text-center container">
                     <div className={`hero-content max-w-4xl mx-auto transition-all duration-1000 ${isLoaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-12'}`}>
-                        <div className="inline-flex items-center gap-2 bg-accent/10 px-4 py-1.5 rounded-full border border-accent/20 mb-8 backdrop-blur-sm">
+                        {/* <div className="inline-flex items-center gap-2 bg-accent/10 px-4 py-1.5 rounded-full border border-accent/20 mb-8 backdrop-blur-sm">
                             <Utensils size={14} className="text-accent" />
                             <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-accent">LoudKitchen Experience</span>
-                        </div>
+                        </div> */}
                         {/* <h1 className="text-5xl md:text-7xl lg:text-9xl font-black mb-8 leading-[0.9] tracking-tighter">
                             SOUND OF <br />
                             <span className="text-accent italic">FLAVOUR</span>
@@ -131,11 +131,11 @@ const Home = () => {
                             Experience the fusion of culinary art and vibrant atmosphere. <br className="hidden md:block" />
                             Where every bite has a rhythm of its own.
                         </p> */}
-                        <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
+                        {/* <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
                             <Link to="/menu" className="btn bg-accent text-black px-12 py-5 font-black uppercase tracking-[0.2em] text-xs rounded-full hover:scale-105 active:scale-95 transition-all shadow-2xl shadow-accent/20 w-full sm:w-auto">
                                 Explore Menu
                             </Link>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
             </section>
