@@ -178,7 +178,7 @@ const Settings = () => {
                                     color: '#aaa', cursor: 'pointer', fontSize: '0.85rem',
                                     background: 'rgba(255,255,255,0.02)', marginTop: '0.5rem'
                                 }}>
-                                    {uploading.hero ? <><Loader2 size={16} className="animate-spin" /> Uploading...</> : <><Video size={16} /> {form.hero_video_url ? 'Change Video' : 'Upload Video'} (Max 20MB)</>}
+                                    {uploading.hero ? <><Loader2 size={16} className="animate-spin" /> Uploading...</> : <><Video size={16} /> {form.hero_video_url ? 'Change Video' : 'Upload Video'} (Max 50MB)</>}
                                     <input type="file" accept="video/mp4" style={{ display: 'none' }} onChange={(e) => handleUpload(e, 'hero')} disabled={uploading.hero} />
                                 </label>
                                 <input
